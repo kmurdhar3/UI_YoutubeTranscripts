@@ -3,7 +3,7 @@ import ManageSubscription from "@/components/manage-subscription";
 import { SubscriptionCheck } from "@/components/subscription-check";
 import { InfoIcon, UserCircle } from "lucide-react";
 import { redirect } from "next/navigation";
-import { createClient } from "../../../supabase/server";
+import { createClient } from "@/supabase/server";
 import { manageSubscriptionAction } from "../actions";
 import { Suspense } from "react";
 

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { createClient } from "@/supabase/client";
+import { saveTranscriptHistory } from "@/lib/transcript-history";
 
 export default function BulkExtractionPage() {
   const [playlistUrl, setPlaylistUrl] = useState("");
@@ -13,6 +15,16 @@ export default function BulkExtractionPage() {
   const [error, setError] = useState<string | null>(null);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const handleGetPlaylist = async () => {
     if (!playlistUrl.trim()) return;
@@ -43,7 +55,18 @@ export default function BulkExtractionPage() {
       const data = await res.json();
       console.log('API Response:', data);
       
-      // Create a blob and download the file
+      if (userId) {
+        await saveTranscriptHistory({
+          user_id: userId,
+          video_id: playlistUrl,
+          video_title: `Channel/Playlist extraction`,
+          download_type: 'channel',
+          transcript_text: JSON.stringify(data).substring(0, 1000),
+          transcript_json: data,
+          total_videos: data.count || 1
+        });
+      }
+      
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -131,7 +154,18 @@ export default function BulkExtractionPage() {
       const data = await res.json();
       console.log('API Response:', data);
       
-      // Create a blob and download the file
+      if (userId) {
+        await saveTranscriptHistory({
+          user_id: userId,
+          video_id: csvFile.name,
+          video_title: `CSV Batch extraction: ${csvFile.name}`,
+          download_type: 'csv',
+          transcript_text: JSON.stringify(data).substring(0, 1000),
+          transcript_json: data,
+          total_videos: data.count || 1
+        });
+      }
+      
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

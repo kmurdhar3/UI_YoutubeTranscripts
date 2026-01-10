@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '../../supabase/server'
+import { createClient } from '@/supabase/server'
 import { Button } from './ui/button'
 import { Menu, Chrome, MessageCircle } from 'lucide-react'
 import UserProfile from './user-profile'
@@ -17,14 +17,14 @@ export default async function Navbar() {
             TranscriptX
           </Link>
           <div className="hidden md:flex items-center gap-6">
-            <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <Link href="/history" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               History
             </Link>
             <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Channel Info
             </Link>
-            <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Playlist
+            <Link href="/bulk-extraction" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Bulk Extraction
             </Link>
             <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               CSV Export

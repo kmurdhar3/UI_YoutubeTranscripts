@@ -5,11 +5,23 @@ import { Star, Shield, Users } from 'lucide-react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/supabase/client";
+import { saveTranscriptHistory } from "@/lib/transcript-history";
 
 export default function Hero() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const handleExtractTranscript = async () => {
     if (!url.trim()) {
@@ -32,9 +44,26 @@ export default function Hero() {
         throw new Error('Failed to extract transcript');
       }
 
-      // Get the file from response
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      const responseBlob = await response.blob();
+      const transcriptText = await responseBlob.text();
+      
+      const videoIdMatch = url.match(/(?:v=|\/)([\w-]{11})/);
+      const videoId = videoIdMatch ? videoIdMatch[1] : 'unknown';
+      
+      if (userId && transcriptText) {
+        await saveTranscriptHistory({
+          user_id: userId,
+          video_id: videoId,
+          video_title: `YouTube Video ${videoId}`,
+          channel_name: null,
+          transcript_text: transcriptText,
+          download_type: 'single',
+          total_videos: 1
+        });
+      }
+      
+      const textBlob = new Blob([transcriptText], { type: 'text/plain' });
+      const downloadUrl = window.URL.createObjectURL(textBlob);
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = 'transcript.txt';

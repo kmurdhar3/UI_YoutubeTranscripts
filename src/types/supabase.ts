@@ -94,6 +94,100 @@ export type Database = {
           },
         ]
       }
+      transcript_downloads: {
+        Row: {
+          channel_url: string | null
+          created_at: string
+          download_timestamp: string
+          download_type: string
+          file_size_bytes: number | null
+          id: string
+          transcript_data: Json | null
+          user_id: string
+          video_count: number | null
+          video_url: string
+        }
+        Insert: {
+          channel_url?: string | null
+          created_at?: string
+          download_timestamp?: string
+          download_type: string
+          file_size_bytes?: number | null
+          id?: string
+          transcript_data?: Json | null
+          user_id: string
+          video_count?: number | null
+          video_url: string
+        }
+        Update: {
+          channel_url?: string | null
+          created_at?: string
+          download_timestamp?: string
+          download_type?: string
+          file_size_bytes?: number | null
+          id?: string
+          transcript_data?: Json | null
+          user_id?: string
+          video_count?: number | null
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_downloads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      transcript_history: {
+        Row: {
+          channel_name: string | null
+          created_at: string | null
+          download_type: string
+          id: string
+          total_videos: number | null
+          transcript_json: Json | null
+          transcript_text: string | null
+          user_id: string
+          video_id: string
+          video_title: string | null
+        }
+        Insert: {
+          channel_name?: string | null
+          created_at?: string | null
+          download_type: string
+          id?: string
+          total_videos?: number | null
+          transcript_json?: Json | null
+          transcript_text?: string | null
+          user_id: string
+          video_id: string
+          video_title?: string | null
+        }
+        Update: {
+          channel_name?: string | null
+          created_at?: string | null
+          download_type?: string
+          id?: string
+          total_videos?: number | null
+          transcript_json?: Json | null
+          transcript_text?: string | null
+          user_id?: string
+          video_id?: string
+          video_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -177,7 +271,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_old_transcript_downloads: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

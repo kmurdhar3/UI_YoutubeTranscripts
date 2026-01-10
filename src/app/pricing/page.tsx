@@ -1,7 +1,7 @@
 import Navbar from "@/components/navbar";
 import PricingCard from "@/components/pricing-card";
 import { api } from "@/lib/polar";
-import { createClient } from "../../../supabase/server";
+import { createClient } from "@/supabase/server";
 
 export default async function Pricing() {
     const supabase = await createClient();

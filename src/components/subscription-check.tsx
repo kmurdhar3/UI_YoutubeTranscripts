@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { checkUserSubscription } from '@/app/actions';
-import { createClient } from '../../supabase/server';
+import { createClient } from '@/supabase/server';
 
 interface SubscriptionCheckProps {
     children: React.ReactNode;

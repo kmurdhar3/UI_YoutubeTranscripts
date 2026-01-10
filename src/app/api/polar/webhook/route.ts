@@ -1,6 +1,6 @@
 // src/app/api/polar/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "../../../../../supabase/server";
+import { createClient } from "@/supabase/server";
 
 const storeWebhookEvent = async (supabase: any, body: any) => {
     try {

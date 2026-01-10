@@ -4,7 +4,7 @@ import { api } from "@/lib/polar";
 import { encodedRedirect } from "@/utils/utils";
 import { Polar } from "@polar-sh/sdk";
 import { redirect } from "next/navigation";
-import { createClient } from "../../supabase/server";
+import { createClient } from "@/supabase/server";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -185,7 +185,7 @@ export const checkUserSubscription = async (userId: string) => {
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error checking subscription status:', error);
@@ -203,11 +203,16 @@ export const manageSubscriptionAction = async (userId: string) => {
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error checking subscription status:', error);
-    return false;
+    return { error: 'Error checking subscription status' };
+  }
+
+  if (!subscription) {
+    console.error('No active subscription found');
+    return { error: 'No active subscription found' };
   }
 
   const polar = new Polar({
