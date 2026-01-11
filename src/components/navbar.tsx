@@ -4,6 +4,7 @@ import { Button } from './ui/button'
 import { Menu, Chrome, MessageCircle } from 'lucide-react'
 import UserProfile from './user-profile'
 import { ThemeSwitcher } from './theme-switcher'
+import { CSVExportClient } from './csv-export-client'
 
 export default async function Navbar() {
   const supabase = createClient()
@@ -26,9 +27,7 @@ export default async function Navbar() {
             <Link href="/bulk-extraction" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Bulk Extraction
             </Link>
-            <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              CSV Export
-            </Link>
+            <CSVExportClient />
             <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               API
             </Link>

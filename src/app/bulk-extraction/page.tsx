@@ -35,7 +35,7 @@ export default function BulkExtractionPage() {
     try {
       console.log('Sending request to API with URL:', playlistUrl);
       
-      const res = await fetch('http://localhost:5000/transcribe-channel', {
+      const res = await fetch('https://brightdata-api-951447856798.us-central1.run.app/transcribe-channel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,6 +78,7 @@ export default function BulkExtractionPage() {
       document.body.removeChild(a);
       
       alert('File downloaded successfully!');
+      setPlaylistUrl(''); // Clear input field after successful download
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Error:', err);
@@ -137,7 +138,7 @@ export default function BulkExtractionPage() {
       
       console.log('Uploading CSV file:', csvFile.name);
       
-      const res = await fetch('http://localhost:5000/transcribe-csv', {
+      const res = await fetch('https://brightdata-api-951447856798.us-central1.run.app/transcribe-csv', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer 2d0f15c9e903030daf1453ba70201c4da9bde54ba908d3ea63b3b287276c5cbe'
@@ -177,7 +178,7 @@ export default function BulkExtractionPage() {
       document.body.removeChild(a);
       
       alert('Transcripts downloaded successfully!');
-      setCsvFile(null);
+      setCsvFile(null); // Clear file after successful download
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Error:', err);

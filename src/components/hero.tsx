@@ -31,7 +31,7 @@ export default function Hero() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/transcribe', {
+      const response = await fetch('https://brightdata-api-951447856798.us-central1.run.app/transcribe', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer 2d0f15c9e903030daf1453ba70201c4da9bde54ba908d3ea63b3b287276c5cbe',
@@ -71,6 +71,7 @@ export default function Hero() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
+      setUrl(''); // Clear input field after successful download
     } catch (error) {
       console.error('Error extracting transcript:', error);
       alert('Failed to extract transcript. Please try again.');
