@@ -101,7 +101,7 @@ export default function Hero() {
                 style={{ fontFamily: "Space Grotesk, sans-serif" }}
               >
                 <Star className="w-4 h-4 mr-2 fill-accent text-accent" />
-                Trusted by 50,000+ content creators
+                Trusted by 1,000+ content creators
               </Badge>
             </div>
 
@@ -145,24 +145,46 @@ export default function Hero() {
 
             {/* Secondary CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
-              <Link href="/bulk-extraction">
+              {userId ? (
+                <Link href="/bulk-extraction">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    style={{ fontFamily: "Space Grotesk, sans-serif" }}
+                  >
+                    Bulk Extraction
+                  </Button>
+                </Link>
+              ) : (
                 <Button
                   variant="outline"
                   size="lg"
+                  disabled
                   style={{ fontFamily: "Space Grotesk, sans-serif" }}
                 >
                   Bulk Extraction
                 </Button>
-              </Link>
-              <Link href="#api">
+              )}
+              {userId ? (
+                <Link href="#api">
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    style={{ fontFamily: "Space Grotesk, sans-serif" }}
+                  >
+                    API Documentation →
+                  </Button>
+                </Link>
+              ) : (
                 <Button
                   variant="ghost"
                   size="lg"
+                  disabled
                   style={{ fontFamily: "Space Grotesk, sans-serif" }}
                 >
                   API Documentation →
                 </Button>
-              </Link>
+              )}
             </div>
 
             {/* Trust indicators */}
@@ -173,7 +195,7 @@ export default function Hero() {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-background"></div>
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-background"></div>
                 </div>
-                <span className="font-medium">50,000+ users</span>
+                <span className="font-medium">1,000+ users</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-accent" />

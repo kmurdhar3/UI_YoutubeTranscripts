@@ -24,13 +24,31 @@ export default async function Navbar() {
             <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Channel Info
             </Link>
-            <Link href="/bulk-extraction" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Bulk Extraction
-            </Link>
-            <CSVExportClient />
-            <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              API
-            </Link>
+            {user ? (
+              <Link href="/bulk-extraction" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Bulk Extraction
+              </Link>
+            ) : (
+              <span className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Bulk Extraction
+              </span>
+            )}
+            {user ? (
+              <CSVExportClient />
+            ) : (
+              <span className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                CSV Export
+              </span>
+            )}
+            {user ? (
+              <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                API
+              </Link>
+            ) : (
+              <span className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                API
+              </span>
+            )}
           </div>
         </div>
         
