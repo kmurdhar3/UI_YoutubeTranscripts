@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
 import Link from "next/link";
-import { Star, Shield, Users } from 'lucide-react';
+import { Star, Shield, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
@@ -10,14 +10,16 @@ import { createClient } from "@/supabase/client";
 import { saveTranscriptHistory } from "@/lib/transcript-history";
 
 export default function Hero() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
     fetchUser();
@@ -25,31 +27,35 @@ export default function Hero() {
 
   const handleExtractTranscript = async () => {
     if (!url.trim()) {
-      alert('Please enter a YouTube URL');
+      alert("Please enter a YouTube URL");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch('https://brightdata-api-951447856798.us-central1.run.app/transcribe', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer 2d0f15c9e903030daf1453ba70201c4da9bde54ba908d3ea63b3b287276c5cbe',
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        "https://brightdata-api-951447856798.us-central1.run.app/transcribe",
+        {
+          method: "POST",
+          headers: {
+            Authorization:
+              "Bearer 2d0f15c9e903030daf1453ba70201c4da9bde54ba908d3ea63b3b287276c5cbe",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
         },
-        body: JSON.stringify({ url }),
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to extract transcript');
+        throw new Error("Failed to extract transcript");
       }
 
       const responseBlob = await response.blob();
       const transcriptText = await responseBlob.text();
-      
+
       const videoIdMatch = url.match(/(?:v=|\/)([\w-]{11})/);
-      const videoId = videoIdMatch ? videoIdMatch[1] : 'unknown';
-      
+      const videoId = videoIdMatch ? videoIdMatch[1] : "unknown";
+
       if (userId && transcriptText) {
         await saveTranscriptHistory({
           user_id: userId,
@@ -57,24 +63,24 @@ export default function Hero() {
           video_title: `YouTube Video ${videoId}`,
           channel_name: null,
           transcript_text: transcriptText,
-          download_type: 'single',
-          total_videos: 1
+          download_type: "single",
+          total_videos: 1,
         });
       }
-      
-      const textBlob = new Blob([transcriptText], { type: 'text/plain' });
+
+      const textBlob = new Blob([transcriptText], { type: "text/plain" });
       const downloadUrl = window.URL.createObjectURL(textBlob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = 'transcript.txt';
+      link.download = "transcript.txt";
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
-      setUrl(''); // Clear input field after successful download
+      setUrl(""); // Clear input field after successful download
     } catch (error) {
-      console.error('Error extracting transcript:', error);
-      alert('Failed to extract transcript. Please try again.');
+      console.error("Error extracting transcript:", error);
+      alert("Failed to extract transcript. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -84,48 +90,55 @@ export default function Hero() {
     <div className="relative overflow-hidden noise-bg">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent opacity-50" />
-      
       <div className="relative pt-32 pb-24 sm:pt-40 sm:pb-32">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto w-[996px] h-[563px]">
             {/* Trust badge */}
             <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <Badge variant="secondary" className="px-4 py-2 text-sm" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <Badge
+                variant="secondary"
+                className="px-4 py-2 text-sm"
+                style={{ fontFamily: "Space Grotesk, sans-serif" }}
+              >
                 <Star className="w-4 h-4 mr-2 fill-accent text-accent" />
                 Trusted by 50,000+ content creators
               </Badge>
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-center mb-6 tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100" style={{ fontFamily: 'Fraunces, serif' }}>
+            <h1
+              className="text-5xl sm:text-6xl lg:text-7xl font-black text-center mb-6 tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
+              style={{ fontFamily: "Fraunces, serif" }}
+            >
               Extract YouTube Transcripts{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">
                 Instantly
               </span>
             </h1>
-            
+
             <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto text-center leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-              Fast, reliable transcript extraction for content creators, marketers, and researchers. 
-              Download in seconds, no signup required.
+              Fast, reliable transcript extraction for content creators,
+              marketers, and researchers. Download in seconds, no signup
+              required.
             </p>
 
             {/* URL Input Form */}
             <div className="max-w-3xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
               <div className="flex flex-col sm:flex-row gap-3 p-2 bg-card rounded-xl shadow-lg border">
-                <Input 
-                  placeholder="Paste YouTube URL here..." 
+                <Input
+                  placeholder="Paste YouTube URL here..."
                   className="flex-1 border-0 focus-visible:ring-0 text-lg h-14"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                 />
-                <Button 
-                  size="lg" 
-                  className="h-14 px-8 text-base font-medium hover:scale-[0.98] transition-transform" 
-                  style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                <Button
+                  size="lg"
+                  className="h-14 px-8 text-base font-medium hover:scale-[0.98] transition-transform"
+                  style={{ fontFamily: "Space Grotesk, sans-serif" }}
                   onClick={handleExtractTranscript}
                   disabled={loading}
                 >
-                  {loading ? 'Extracting...' : 'Extract Transcript'}
+                  {loading ? "Extracting..." : "Extract Transcript"}
                 </Button>
               </div>
             </div>
@@ -133,12 +146,20 @@ export default function Hero() {
             {/* Secondary CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
               <Link href="/bulk-extraction">
-                <Button variant="outline" size="lg" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  style={{ fontFamily: "Space Grotesk, sans-serif" }}
+                >
                   Bulk Extraction
                 </Button>
               </Link>
               <Link href="#api">
-                <Button variant="ghost" size="lg" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  style={{ fontFamily: "Space Grotesk, sans-serif" }}
+                >
                   API Documentation →
                 </Button>
               </Link>

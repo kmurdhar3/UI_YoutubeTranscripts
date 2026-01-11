@@ -188,6 +188,63 @@ export type Database = {
           },
         ]
       }
+      user_api_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_used_at: string | null
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          token: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          token?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          plan: string
+          quota: number
+          quota_reset_date: string | null
+          updated_at: string
+          used_quota: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan?: string
+          quota?: number
+          quota_reset_date?: string | null
+          updated_at?: string
+          used_quota?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan?: string
+          quota?: number
+          quota_reset_date?: string | null
+          updated_at?: string
+          used_quota?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
