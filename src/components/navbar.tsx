@@ -5,10 +5,19 @@ import { Menu, Chrome, MessageCircle } from 'lucide-react'
 import UserProfile from './user-profile'
 import { ThemeSwitcher } from './theme-switcher'
 import { CSVExportClient } from './csv-export-client'
+import { getTranscriptHistoryStats } from '@/lib/transcript-history'
 
 export default async function Navbar() {
   const supabase = createClient()
   const { data: { user } } = await (await supabase).auth.getUser()
+  
+  let totalDownloads = 0
+  if (user) {
+    const stats = await getTranscriptHistoryStats(user.id)
+    totalDownloads = stats.total_downloads
+  }
+  
+  const hasReachedLimit = totalDownloads >= 25
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -24,8 +33,12 @@ export default async function Navbar() {
             <Link href="#" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Channel Info
             </Link>
-            {user ? (
+            {user && !hasReachedLimit ? (
               <Link href="/bulk-extraction" className="text-sm font-medium hover:text-primary transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Bulk Extraction
+              </Link>
+            ) : user && hasReachedLimit ? (
+              <Link href="/pricing" className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 Bulk Extraction
               </Link>
             ) : (
@@ -33,7 +46,7 @@ export default async function Navbar() {
                 Bulk Extraction
               </span>
             )}
-            {user ? (
+            {user && !hasReachedLimit ? (
               <CSVExportClient />
             ) : (
               <span className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>

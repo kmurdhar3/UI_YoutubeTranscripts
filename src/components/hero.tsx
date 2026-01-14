@@ -7,12 +7,14 @@ import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { useState, useEffect } from "react";
 import { createClient } from "@/supabase/client";
-import { saveTranscriptHistory } from "@/lib/transcript-history";
+import { saveTranscriptHistory, getTranscriptHistoryStats } from "@/lib/transcript-history";
 
 export default function Hero() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [totalDownloads, setTotalDownloads] = useState(0);
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,6 +23,12 @@ export default function Hero() {
         data: { user },
       } = await supabase.auth.getUser();
       setUserId(user?.id || null);
+      
+      if (user) {
+        const stats = await getTranscriptHistoryStats(user.id);
+        setTotalDownloads(stats.total_downloads);
+        setHasReachedLimit(stats.total_downloads >= 25);
+      }
     };
     fetchUser();
   }, []);
@@ -145,7 +153,7 @@ export default function Hero() {
 
             {/* Secondary CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
-              {userId ? (
+              {userId && !hasReachedLimit ? (
                 <Link href="/bulk-extraction">
                   <Button
                     variant="outline"
@@ -155,6 +163,18 @@ export default function Hero() {
                     Bulk Extraction
                   </Button>
                 </Link>
+              ) : userId && hasReachedLimit ? (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  style={{ fontFamily: "Space Grotesk, sans-serif" }}
+                  onClick={() => {
+                    alert("You've reached the free limit of 25 downloads. Please subscribe to continue using bulk extraction and CSV export features.");
+                    window.location.href = "/pricing";
+                  }}
+                >
+                  Bulk Extraction
+                </Button>
               ) : (
                 <Button
                   variant="outline"

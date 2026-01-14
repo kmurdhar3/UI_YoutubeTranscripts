@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Upload, FileText } from 'lucide-react'
 import { createClient } from '@/supabase/client'
-import { saveTranscriptHistory } from '@/lib/transcript-history'
+import { saveTranscriptHistory, getTranscriptHistoryStats } from '@/lib/transcript-history'
 
 interface CSVExportDialogProps {
   children?: React.ReactNode
@@ -23,6 +23,30 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
+  const [hasReachedLimit, setHasReachedLimit] = useState(false)
+
+  useEffect(() => {
+    const checkLimit = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const stats = await getTranscriptHistoryStats(user.id)
+        setHasReachedLimit(stats.total_downloads >= 25)
+      }
+    }
+    
+    checkLimit()
+  }, [])
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && hasReachedLimit) {
+      alert("You've reached the free limit of 25 downloads. Please subscribe to continue using bulk extraction and CSV export features.")
+      window.location.href = "/pricing"
+      return
+    }
+    setOpen(newOpen)
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -118,7 +142,7 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>

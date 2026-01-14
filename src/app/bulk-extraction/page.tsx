@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/supabase/client";
-import { saveTranscriptHistory } from "@/lib/transcript-history";
+import { saveTranscriptHistory, getTranscriptHistoryStats } from "@/lib/transcript-history";
 
 export default function BulkExtractionPage() {
   const [playlistUrl, setPlaylistUrl] = useState("");
@@ -16,12 +16,23 @@ export default function BulkExtractionPage() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setUserId(user?.id || null);
+      
+      if (user) {
+        const stats = await getTranscriptHistoryStats(user.id);
+        setHasReachedLimit(stats.total_downloads >= 25);
+        
+        if (stats.total_downloads >= 25) {
+          alert("You've reached the free limit of 25 downloads. Please subscribe to continue using bulk extraction and CSV export features.");
+          window.location.href = "/pricing";
+        }
+      }
     };
     fetchUser();
   }, []);
