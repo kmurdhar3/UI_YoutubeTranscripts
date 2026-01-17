@@ -56,19 +56,19 @@ export default function FAQ() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto grid lg:grid-cols-[1fr_300px] gap-8">
+        <div className="max-w-4xl mx-auto grid lg:grid-cols-[1fr_300px] gap-6 lg:gap-8">
           <div>
-            <Accordion type="single" collapsible className="space-y-4">
+            <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
               {faqs.map((faq, index) => (
                 <AccordionItem 
                   key={index} 
                   value={`item-${index}`}
-                  className="border rounded-lg px-6 bg-card"
+                  className="border rounded-lg px-4 sm:px-6 bg-card"
                 >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline py-5">
+                  <AccordionTrigger className="text-left text-sm sm:text-base font-semibold hover:no-underline py-4 sm:py-5">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                  <AccordionContent className="text-sm text-muted-foreground pb-4 sm:pb-5 leading-relaxed">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -78,17 +78,17 @@ export default function FAQ() {
 
           <div className="lg:sticky lg:top-24 h-fit">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="text-center mb-4">
-                  <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary mb-3">
-                    <MessageCircle className="w-6 h-6" />
+                  <div className="inline-flex p-2.5 sm:p-3 rounded-full bg-primary/10 text-primary mb-3">
+                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">Still have questions?</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <h3 className="font-semibold text-base sm:text-lg mb-2">Still have questions?</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                     Can't find the answer you're looking for? Our support team is here to help.
                   </p>
                 </div>
-                <Button className="w-full" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                <Button className="w-full text-sm" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                   Contact Support
                 </Button>
               </CardContent>

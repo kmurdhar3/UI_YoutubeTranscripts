@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_sessions: {
+        Row: {
+          admin_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          session_token: string
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sessions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          last_login_at: string | null
+          name: string | null
+          password_hash: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          last_login_at?: string | null
+          name?: string | null
+          password_hash: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          last_login_at?: string | null
+          name?: string | null
+          password_hash?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscription_activity_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_plan: string | null
+          new_status: string | null
+          previous_plan: string | null
+          previous_status: string | null
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_plan?: string | null
+          new_status?: string | null
+          previous_plan?: string | null
+          previous_status?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_plan?: string | null
+          new_status?: string | null
+          previous_plan?: string | null
+          previous_status?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number | null
@@ -285,6 +392,51 @@ export type Database = {
           name?: string | null
           subscription?: string | null
           token_identifier?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      users_backup_20250116: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          credits: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          image: string | null
+          name: string | null
+          subscription: string | null
+          token_identifier: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          credits?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          image?: string | null
+          name?: string | null
+          subscription?: string | null
+          token_identifier?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          credits?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          image?: string | null
+          name?: string | null
+          subscription?: string | null
+          token_identifier?: string | null
           updated_at?: string | null
           user_id?: string | null
         }

@@ -4,7 +4,7 @@ import { api } from "@/lib/polar";
 import { encodedRedirect } from "@/utils/utils";
 import { Polar } from "@polar-sh/sdk";
 import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
+import { createClient, createServiceClient } from "@/supabase/server";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -20,6 +20,11 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
+  // Get the site URL - use the deployed URL in production
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+    'http://localhost:3000';
+
   const { data: { user }, error } = await supabase.auth.signUp({
     email,
     password,
@@ -27,7 +32,8 @@ export const signUpAction = async (formData: FormData) => {
       data: {
         full_name: fullName,
         email: email,
-      }
+      },
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 
@@ -38,20 +44,57 @@ export const signUpAction = async (formData: FormData) => {
 
   if (user) {
     try {
-      const { error: updateError } = await supabase
+      // Use service role client to bypass RLS for admin operations
+      const serviceClient = createServiceClient();
+      
+      // Check if user already exists in users table
+      const { data: existingUser } = await serviceClient
         .from('users')
-        .insert({
-          id: user.id,
-          name: fullName,
-          full_name: fullName,
-          email: email,
-          user_id: user.id,
-          token_identifier: user.id,
-          created_at: new Date().toISOString()
-        });
+        .select('id')
+        .eq('id', user.id)
+        .single();
 
-      if (updateError) {
-        console.error('Error updating user profile:', updateError);
+      if (!existingUser) {
+        // Insert into users table only if not exists
+        const { error: updateError } = await serviceClient
+          .from('users')
+          .insert({
+            id: user.id,
+            name: fullName,
+            full_name: fullName,
+            email: email,
+            user_id: user.id,
+            token_identifier: user.id,
+            created_at: new Date().toISOString()
+          });
+
+        if (updateError) {
+          console.error('Error updating user profile:', updateError);
+        }
+      }
+
+      // Check if admin user already exists
+      const { data: existingAdmin } = await serviceClient
+        .from('admin_users')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (!existingAdmin) {
+        // Also add to admin_users table only if not exists
+        const { error: adminError } = await serviceClient
+          .from('admin_users')
+          .insert({
+            email: email.toLowerCase(),
+            password_hash: 'supabase_auth', // Not used since we use Supabase Auth
+            name: fullName || 'User',
+            role: 'super_admin',
+            is_active: true,
+          });
+
+        if (adminError) {
+          console.error('Error creating admin user:', adminError);
+        }
       }
     } catch (err) {
       console.error('Error in user profile creation:', err);

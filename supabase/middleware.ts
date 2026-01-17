@@ -38,23 +38,15 @@ export const updateSession = async (request: NextRequest) => {
       }
     );
 
-    // Handle email verification callback
+    // Handle email verification callback - redirect to proper callback route
     const code = request.nextUrl.searchParams.get('code');
-    if (code) {
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-      
-      if (!exchangeError) {
-        // Create a new response with the session cookies
-        const url = new URL("/dashboard", request.url);
-        const redirectResponse = NextResponse.redirect(url);
-        
-        // Copy all cookies from the original response to the redirect
-        response.cookies.getAll().forEach((cookie) => {
-          redirectResponse.cookies.set(cookie.name, cookie.value);
-        });
-        
-        return redirectResponse;
-      }
+    const pathname = request.nextUrl.pathname;
+    
+    // If code is present but not on /auth/callback, redirect there
+    if (code && pathname !== '/auth/callback') {
+      const callbackUrl = new URL("/auth/callback", request.url);
+      callbackUrl.searchParams.set('code', code);
+      return NextResponse.redirect(callbackUrl);
     }
 
     // This will refresh session if expired - required for Server Components

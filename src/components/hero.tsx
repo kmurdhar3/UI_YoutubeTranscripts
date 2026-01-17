@@ -100,22 +100,23 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent opacity-50" />
       <div className="relative pt-32 pb-24 sm:pt-40 sm:pb-32">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto w-[996px] h-[563px]">
+          <div className="max-w-5xl mx-auto">
             {/* Trust badge */}
-            <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex justify-center mb-6 sm:mb-8">
               <Badge
                 variant="secondary"
-                className="px-4 py-2 text-sm"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm"
                 style={{ fontFamily: "Space Grotesk, sans-serif" }}
               >
-                <Star className="w-4 h-4 mr-2 fill-accent text-accent" />
-                Trusted by 1,000+ content creators
+                <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 fill-accent text-accent" />
+                <span className="hidden sm:inline">Trusted by 1,000+ content creators</span>
+                <span className="sm:hidden">1,000+ creators</span>
               </Badge>
             </div>
 
             {/* Headline */}
             <h1
-              className="text-5xl sm:text-6xl lg:text-7xl font-black text-center mb-6 tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center mb-4 sm:mb-6 tracking-tight px-4"
               style={{ fontFamily: "Fraunces, serif" }}
             >
               Extract YouTube Transcripts{" "}
@@ -124,24 +125,24 @@ export default function Hero() {
               </span>
             </h1>
 
-            <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto text-center leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-12 max-w-3xl mx-auto text-center leading-relaxed px-4">
               Fast, reliable transcript extraction for content creators,
               marketers, and researchers. Download in seconds, no signup
               required.
             </p>
 
             {/* URL Input Form */}
-            <div className="max-w-3xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-              <div className="flex flex-col sm:flex-row gap-3 p-2 bg-card rounded-xl shadow-lg border">
+            <div className="max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-1.5 sm:p-2 bg-card rounded-xl shadow-lg border">
                 <Input
                   placeholder="Paste YouTube URL here..."
-                  className="flex-1 border-0 focus-visible:ring-0 text-lg h-14"
+                  className="flex-1 border-0 focus-visible:ring-0 text-base sm:text-lg h-12 sm:h-14"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                 />
                 <Button
                   size="lg"
-                  className="h-14 px-8 text-base font-medium hover:scale-[0.98] transition-transform"
+                  className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-medium"
                   style={{ fontFamily: "Space Grotesk, sans-serif" }}
                   onClick={handleExtractTranscript}
                   disabled={loading}
@@ -152,7 +153,7 @@ export default function Hero() {
             </div>
 
             {/* Secondary CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4">
               {userId && !hasReachedLimit ? (
                 <Link href="/bulk-extraction">
                   <Button
@@ -208,26 +209,27 @@ export default function Hero() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 text-xs sm:text-sm text-muted-foreground px-4">
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 border-2 border-background"></div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-background"></div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-background"></div>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 border-2 border-background"></div>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-background"></div>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-background"></div>
                 </div>
                 <span className="font-medium">1,000+ users</span>
               </div>
               <div className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-accent" />
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                 <span>SSL Secure</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                    <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-accent text-accent" />
                   ))}
                 </div>
-                <span className="font-medium">4.9/5 (2,340 reviews)</span>
+                <span className="font-medium hidden sm:inline">4.9/5 (2,340 reviews)</span>
+                <span className="font-medium sm:hidden">4.9/5</span>
               </div>
             </div>
           </div>

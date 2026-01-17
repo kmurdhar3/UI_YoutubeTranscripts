@@ -13,5 +13,11 @@ export async function GET(request: Request) {
 
   // URL to redirect to after sign in process completes
   const redirectTo = redirect_to || "/dashboard";
-  return NextResponse.redirect(new URL(redirectTo, requestUrl.origin));
+  
+  // Use the request headers to get the correct origin
+  const host = request.headers.get('host') || 'get-youtube-transcripts.io';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  const origin = `${protocol}://${host}`;
+  
+  return NextResponse.redirect(new URL(redirectTo, origin));
 } 
