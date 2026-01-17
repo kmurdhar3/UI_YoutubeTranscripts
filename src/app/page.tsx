@@ -24,7 +24,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <Hero className="w-[1511px] h-[711px]" />
+      <Hero />
       <FeaturesGrid />
       <UseCasesCarousel />
       <SocialProof />

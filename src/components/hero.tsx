@@ -69,7 +69,7 @@ export default function Hero() {
           user_id: userId,
           video_id: videoId,
           video_title: `YouTube Video ${videoId}`,
-          channel_name: null,
+          channel_name: "",
           transcript_text: transcriptText,
           download_type: "single",
           total_videos: 1,
