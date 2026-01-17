@@ -1,0 +1,18 @@
+cd ~/Documents/YouTube_transcript/UI/UI_YoutubeTranscripts
+
+# Deploy with optimized settings
+gcloud run deploy youtube-transcripts-ui \
+  --image gcr.io/transcriptsui-484117/youtube-transcripts-ui \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --project=transcriptsui-484117 \
+  --port=8080 \
+  --memory=1Gi \
+  --cpu=2 \
+  --min-instances=0 \
+  --max-instances=10 \
+  --concurrency=80 \
+  --timeout=300 \
+  --cpu-boost \
+  --execution-environment=gen2
