@@ -1,4 +1,6 @@
 cd ~/Documents/YouTube_transcript/UI/UI_YoutubeTranscripts
+# If successful, rebuild the Docker image
+gcloud builds submit --tag gcr.io/transcriptsui-484117/youtube-transcripts-ui --project=transcriptsui-484117
 
 # Deploy with optimized settings
 gcloud run deploy youtube-transcripts-ui \
