@@ -71,9 +71,15 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
     try {
       const response = await fetch(`/api/admin/analytics?period=${period}`);
       const data = await response.json();
+      if (!response.ok || data.error) {
+        console.error("Failed to fetch stats:", data.error);
+        setStats(null);
+        return;
+      }
       setStats(data);
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+      setStats(null);
     } finally {
       setLoading(false);
     }
@@ -167,10 +173,10 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Total Users</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.overview.totalUsers.toLocaleString() || "0"}
+                  {stats?.overview?.totalUsers?.toLocaleString() || "0"}
                 </p>
                 <p className="text-xs text-green-400 flex items-center mt-1">
-                  <TrendingUp className="w-3 h-3 mr-1" />+{stats?.overview.newUsers || 0} new
+                  <TrendingUp className="w-3 h-3 mr-1" />+{stats?.overview?.newUsers || 0} new
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
@@ -186,10 +192,10 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Active Subscriptions</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.subscriptions.active.toLocaleString() || "0"}
+                  {stats?.subscriptions?.active?.toLocaleString() || "0"}
                 </p>
                 <p className="text-xs text-green-400 flex items-center mt-1">
-                  <TrendingUp className="w-3 h-3 mr-1" />+{stats?.subscriptions.new || 0} new
+                  <TrendingUp className="w-3 h-3 mr-1" />+{stats?.subscriptions?.new || 0} new
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
@@ -205,10 +211,10 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Monthly Revenue</p>
                 <p className="text-2xl font-bold text-white">
-                  {formatCurrency(stats?.overview.monthlyRevenue || 0)}
+                  {formatCurrency(stats?.overview?.monthlyRevenue || 0)}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  from {stats?.subscriptions.active || 0} subs
+                  from {stats?.subscriptions?.active || 0} subs
                 </p>
               </div>
               <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
@@ -247,7 +253,7 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Videos Extracted</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.overview.totalVideosExtracted?.toLocaleString() || "0"}
+                  {stats?.overview?.totalVideosExtracted?.toLocaleString() || "0"}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
                   total videos processed
@@ -266,7 +272,7 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Active Users (w/ History)</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.overview.uniqueUsersWithHistory?.toLocaleString() || "0"}
+                  {stats?.overview?.uniqueUsersWithHistory?.toLocaleString() || "0"}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
                   users with extractions
@@ -285,7 +291,7 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Avg Extractions/User</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.overview.uniqueUsersWithHistory && stats?.history?.totalExtractions
+                  {stats?.overview?.uniqueUsersWithHistory && stats?.history?.totalExtractions
                     ? (stats.history.totalExtractions / stats.overview.uniqueUsersWithHistory).toFixed(1)
                     : "0"}
                 </p>
@@ -306,7 +312,7 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div>
                 <p className="text-sm text-slate-400">Conversion Rate</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.overview.totalUsers && stats?.subscriptions.active
+                  {stats?.overview?.totalUsers && stats?.subscriptions?.active
                     ? ((stats.subscriptions.active / stats.overview.totalUsers) * 100).toFixed(1)
                     : "0"}%
                 </p>
@@ -337,13 +343,13 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div className="p-4 bg-slate-700/30 rounded-lg">
                 <p className="text-xs text-slate-400 mb-1">Monthly Plans</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.subscriptions.intervalBreakdown.monthly || 0}
+                  {stats?.subscriptions?.intervalBreakdown?.monthly || 0}
                 </p>
               </div>
               <div className="p-4 bg-slate-700/30 rounded-lg">
                 <p className="text-xs text-slate-400 mb-1">Yearly Plans</p>
                 <p className="text-2xl font-bold text-white">
-                  {stats?.subscriptions.intervalBreakdown.yearly || 0}
+                  {stats?.subscriptions?.intervalBreakdown?.yearly || 0}
                 </p>
               </div>
             </div>
@@ -351,19 +357,19 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-400">Active</span>
                 <Badge className="bg-green-500/20 text-green-400">
-                  {stats?.subscriptions.active || 0}
+                  {stats?.subscriptions?.active || 0}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-400">Canceled (this period)</span>
                 <Badge className="bg-red-500/20 text-red-400">
-                  {stats?.subscriptions.canceled || 0}
+                  {stats?.subscriptions?.canceled || 0}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-400">Total All Time</span>
                 <Badge className="bg-slate-500/20 text-slate-400">
-                  {stats?.subscriptions.total || 0}
+                  {stats?.subscriptions?.total || 0}
                 </Badge>
               </div>
             </div>
