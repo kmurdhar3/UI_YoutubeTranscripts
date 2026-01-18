@@ -9,8 +9,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Add your Supabase credentials here
-ENV NEXT_PUBLIC_SUPABASE_URL=https://buyzgatijpqziwutygzr.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1eXpnYXRpanBxeml3dXR5Z3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDAyNjgsImV4cCI6MjA4MTQ3NjI2OH0.9m8jJFIgGsgsnH07GCgXs7MgIFTo5_HI3xsrGnJj23s
+ENV NEXT_PUBLIC_SUPABASE_URL=
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 RUN npm run build
 
