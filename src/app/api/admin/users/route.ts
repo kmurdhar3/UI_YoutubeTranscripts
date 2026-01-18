@@ -16,6 +16,15 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "created_at";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
+    // Check if service key is available
+    if (!process.env.SUPABASE_SERVICE_KEY) {
+      console.error("SUPABASE_SERVICE_KEY is not configured");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing service key" },
+        { status: 500 }
+      );
+    }
+
     // Use service client to bypass RLS and see all users
     const supabase = createServiceClient();
 
@@ -49,13 +58,14 @@ export async function GET(request: NextRequest) {
     // Get extraction counts per user from transcript_history
     const { data: extractionCounts } = await supabase
       .from("transcript_history")
-      .select("user_id");
+      .select("user_id, total_videos");
 
-    // Count extractions per user
+    // Count extractions per user (sum of total_videos)
     const extractionCountMap: Record<string, number> = {};
     extractionCounts?.forEach((record) => {
       const userId = record.user_id;
-      extractionCountMap[userId] = (extractionCountMap[userId] || 0) + 1;
+      const totalVideos = record.total_videos || 1; // Default to 1 if null
+      extractionCountMap[userId] = (extractionCountMap[userId] || 0) + totalVideos;
     });
 
     // Get subscriptions per user
@@ -89,10 +99,12 @@ export async function GET(request: NextRequest) {
       .from("users")
       .select("*", { count: "exact", head: true });
 
-    // Get total extractions
-    const { count: totalExtractions } = await supabase
+    // Get total extractions (sum of total_videos)
+    const { data: allExtractions } = await supabase
       .from("transcript_history")
-      .select("*", { count: "exact", head: true });
+      .select("total_videos");
+    
+    const totalExtractions = allExtractions?.reduce((sum, record) => sum + (record.total_videos || 1), 0) || 0;
 
     // Get users with active subscriptions
     const { data: activeSubscribers } = await supabase

@@ -12,6 +12,15 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const period = searchParams.get("period") || "30d"; // 7d, 30d, 90d, 1y
 
+    // Check if service key is available
+    if (!process.env.SUPABASE_SERVICE_KEY) {
+      console.error("SUPABASE_SERVICE_KEY is not configured");
+      return NextResponse.json(
+        { error: "Server configuration error: Missing service key" },
+        { status: 500 }
+      );
+    }
+
     // Use service client to bypass RLS and see all data
     const supabase = createServiceClient();
 

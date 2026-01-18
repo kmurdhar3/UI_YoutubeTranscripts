@@ -11,10 +11,7 @@ import { saveTranscriptHistory, getTranscriptHistoryStats } from "@/lib/transcri
 export default function BulkExtractionPage() {
   const [playlistUrl, setPlaylistUrl] = useState("");
   const [playlistLoading, setPlaylistLoading] = useState(false);
-  const [csvLoading, setCsvLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
 
@@ -26,9 +23,10 @@ export default function BulkExtractionPage() {
       
       if (user) {
         const stats = await getTranscriptHistoryStats(user.id);
-        setHasReachedLimit(stats.total_downloads >= 25);
+        const reachedLimit = stats.total_downloads >= 25;
+        setHasReachedLimit(reachedLimit);
         
-        if (stats.total_downloads >= 25) {
+        if (reachedLimit) {
           alert("You've reached the free limit of 25 downloads. Please subscribe to continue using bulk extraction and CSV export features.");
           window.location.href = "/pricing";
         }
@@ -39,6 +37,12 @@ export default function BulkExtractionPage() {
 
   const handleGetPlaylist = async () => {
     if (!playlistUrl.trim()) return;
+    
+    if (hasReachedLimit) {
+      alert("You've reached the free limit of 25 downloads. Please subscribe to continue.");
+      window.location.href = "/pricing";
+      return;
+    }
     
     setPlaylistLoading(true);
     setError(null);
@@ -63,30 +67,90 @@ export default function BulkExtractionPage() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       
-      const data = await res.json();
-      console.log('API Response:', data);
+      // Get the content type to determine if it's a ZIP file
+      const contentType = res.headers.get('content-type') || '';
+      const isZip = contentType.includes('application/zip') || contentType.includes('application/octet-stream');
       
-      if (userId) {
-        await saveTranscriptHistory({
-          user_id: userId,
-          video_id: playlistUrl,
-          video_title: `Channel/Playlist extraction`,
-          download_type: 'channel',
-          transcript_text: JSON.stringify(data).substring(0, 1000),
-          transcript_json: data,
-          total_videos: data.count || 1
-        });
+      // Try to get the video count from response headers (case-insensitive)
+      // Log all headers for debugging
+      console.log('Response headers:');
+      res.headers.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`);
+      });
+      
+      let videoCount = 1;
+      
+      // Try x-total-videos header first
+      const videoCountHeader = res.headers.get('x-total-videos') || res.headers.get('X-Total-Videos') || res.headers.get('x-video-count');
+      console.log('Video count header value:', videoCountHeader);
+      
+      if (videoCountHeader) {
+        videoCount = parseInt(videoCountHeader, 10);
+      } else {
+        // Fallback: try to extract from content-disposition filename (e.g., "csv_sample_urls_4of4videos_...")
+        const contentDisposition = res.headers.get('content-disposition') || '';
+        console.log('Content-Disposition:', contentDisposition);
+        const filenameMatch = contentDisposition.match(/(\d+)of(\d+)videos/);
+        if (filenameMatch) {
+          videoCount = parseInt(filenameMatch[2], 10); // Get total from "Xof<total>videos"
+          console.log('Extracted video count from filename:', videoCount);
+        }
       }
       
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `transcript-${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      console.log('Final video count:', videoCount);
+      
+      if (isZip) {
+        // Handle ZIP file response
+        const blob = await res.blob();
+        console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount);
+        
+        if (userId) {
+          await saveTranscriptHistory({
+            user_id: userId,
+            video_id: playlistUrl,
+            video_title: `Channel/Playlist extraction`,
+            download_type: 'channel',
+            transcript_text: 'ZIP file download',
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
+            total_videos: videoCount
+          });
+        }
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transcripts-${Date.now()}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        // Handle JSON response
+        const data = await res.json();
+        console.log('API Response:', data);
+        
+        if (userId) {
+          await saveTranscriptHistory({
+            user_id: userId,
+            video_id: playlistUrl,
+            video_title: `Channel/Playlist extraction`,
+            download_type: 'channel',
+            transcript_text: JSON.stringify(data).substring(0, 1000),
+            transcript_json: data,
+            total_videos: data.count || 1
+          });
+        }
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transcript-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
       
       alert('File downloaded successfully!');
       setPlaylistUrl(''); // Clear input field after successful download
@@ -97,106 +161,6 @@ export default function BulkExtractionPage() {
       alert(`Error: ${errorMessage}`);
     } finally {
       setPlaylistLoading(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
-      setCsvFile(file);
-      setError(null);
-    } else {
-      setError('Please select a valid CSV file');
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files?.[0];
-    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
-      setCsvFile(file);
-      setError(null);
-    } else {
-      setError('Please drop a valid CSV file');
-    }
-  };
-
-  const handleUploadClick = () => {
-    document.getElementById('csv-upload')?.click();
-  };
-
-  const handleFetchTranscripts = async () => {
-    if (!csvFile) return;
-    
-    setCsvLoading(true);
-    setError(null);
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', csvFile);
-      
-      console.log('Uploading CSV file:', csvFile.name);
-      
-      const res = await fetch('https://brightdata-api-951447856798.us-central1.run.app/transcribe-csv', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer 2d0f15c9e903030daf1453ba70201c4da9bde54ba908d3ea63b3b287276c5cbe'
-        },
-        body: formData
-      });
-      
-      console.log('Response status:', res.status);
-      
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      
-      const data = await res.json();
-      console.log('API Response:', data);
-      
-      if (userId) {
-        await saveTranscriptHistory({
-          user_id: userId,
-          video_id: csvFile.name,
-          video_title: `CSV Batch extraction: ${csvFile.name}`,
-          download_type: 'csv',
-          transcript_text: JSON.stringify(data).substring(0, 1000),
-          transcript_json: data,
-          total_videos: data.count || 1
-        });
-      }
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `transcripts-${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      alert('Transcripts downloaded successfully!');
-      setCsvFile(null); // Clear file after successful download
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      console.error('Error:', err);
-      setError(errorMessage);
-      alert(`Error: ${errorMessage}`);
-    } finally {
-      setCsvLoading(false);
     }
   };
 
@@ -250,45 +214,6 @@ export default function BulkExtractionPage() {
           <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
             You can get create a Channel Playlist from any YouTube Channel by <Link href="#" className="text-pink-500 underline">extracting the Channel ID</Link>.
           </p>
-
-          <div className="text-center py-8 sm:py-12">
-            <p className="text-gray-500 mb-4 sm:mb-6 text-sm sm:text-base">or</p>
-            <input
-              id="csv-upload"
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <div 
-              className={`border-2 border-dashed rounded-lg p-6 sm:p-8 lg:p-12 cursor-pointer ${
-                isDragging 
-                  ? 'border-pink-500 bg-pink-50' 
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={handleUploadClick}
-            >
-              <p className="text-sm sm:text-base text-gray-600">
-                {csvFile 
-                  ? `Selected: ${csvFile.name}` 
-                  : "Drag 'n' drop a CSV file here, or click to upload"
-                }
-              </p>
-            </div>
-            
-            {csvFile && (
-              <Button 
-                className="bg-pink-500 hover:bg-pink-600 text-white px-6 sm:px-8 py-2 mt-4 sm:mt-6 text-sm sm:text-base"
-                onClick={handleFetchTranscripts}
-                disabled={csvLoading}
-              >
-                {csvLoading ? 'Fetching...' : 'Fetch Transcripts'}
-              </Button>
-            )}
-          </div>
 
           <p className="text-xs sm:text-sm text-gray-600 mt-4 sm:mt-6">
             Fetching transcripts in bulk (from a playlist or CSV), requires tokens. One transcript equals one token. You can purchase tokens from the <Link href="/pricing" className="text-pink-500 underline">pricing</Link> page.

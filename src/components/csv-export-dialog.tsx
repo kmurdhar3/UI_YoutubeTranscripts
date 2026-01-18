@@ -41,7 +41,7 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
 
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen && hasReachedLimit) {
-      alert("You've reached the free limit of 25 downloads. Please subscribe to continue using bulk extraction and CSV export features.")
+      alert("You've reached the free limit of 25 downloads. Please subscribe to continue.")
       window.location.href = "/pricing"
       return
     }
@@ -99,35 +99,95 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
         throw new Error(`HTTP error! status: ${res.status}`)
       }
       
-      const data = await res.json()
+      // Get the content type to determine if it's a ZIP file
+      const contentType = res.headers.get('content-type') || ''
+      const isZip = contentType.includes('application/zip') || contentType.includes('application/octet-stream')
+      
+      // Try to get the video count from response headers (case-insensitive)
+      // Log all headers for debugging
+      console.log('Response headers:')
+      res.headers.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`)
+      })
+      
+      let videoCount = 1
+      
+      // Try x-total-videos header first
+      const videoCountHeader = res.headers.get('x-total-videos') || res.headers.get('X-Total-Videos') || res.headers.get('x-video-count')
+      console.log('Video count header value:', videoCountHeader)
+      
+      if (videoCountHeader) {
+        videoCount = parseInt(videoCountHeader, 10)
+      } else {
+        // Fallback: try to extract from content-disposition filename (e.g., "csv_sample_urls_4of4videos_...")
+        const contentDisposition = res.headers.get('content-disposition') || ''
+        console.log('Content-Disposition:', contentDisposition)
+        const filenameMatch = contentDisposition.match(/(\d+)of(\d+)videos/)
+        if (filenameMatch) {
+          videoCount = parseInt(filenameMatch[2], 10) // Get total from "Xof<total>videos"
+          console.log('Extracted video count from filename:', videoCount)
+        }
+      }
+      
+      console.log('Final video count:', videoCount)
       
       // Save to history
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (user) {
-        const videoCount = Array.isArray(data) ? data.length : 1
-        await saveTranscriptHistory({
-          user_id: user.id,
-          video_id: `csv_batch_${Date.now()}`,
-          video_title: csvFile.name,
-          channel_name: 'CSV Batch Export',
-          transcript_json: data,
-          download_type: 'csv',
-          total_videos: videoCount
-        })
+      if (isZip) {
+        // Handle ZIP file response
+        const blob = await res.blob()
+        console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount)
+        
+        if (user) {
+          await saveTranscriptHistory({
+            user_id: user.id,
+            video_id: `csv_batch_${Date.now()}`,
+            video_title: csvFile.name,
+            channel_name: 'CSV Batch Export',
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
+            download_type: 'csv',
+            total_videos: videoCount
+          })
+        }
+        
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `transcripts_${Date.now()}.zip`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        // Handle JSON response
+        const data = await res.json()
+        
+        if (user) {
+          const videoCount = Array.isArray(data) ? data.length : 1
+          await saveTranscriptHistory({
+            user_id: user.id,
+            video_id: `csv_batch_${Date.now()}`,
+            video_title: csvFile.name,
+            channel_name: 'CSV Batch Export',
+            transcript_json: data,
+            download_type: 'csv',
+            total_videos: videoCount
+          })
+        }
+        
+        // Download the file
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `transcripts_${Date.now()}.json`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
       }
-      
-      // Download the file
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `transcripts_${Date.now()}.json`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
       
       alert('Transcripts downloaded successfully!')
       setCsvFile(null)
