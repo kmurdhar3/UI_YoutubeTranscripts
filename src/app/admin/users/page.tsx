@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/admin-auth";
 import { UsersListClient } from "@/components/admin/users-list-client";
