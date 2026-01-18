@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       .from("webhook_events")
       .select("event_type");
 
-    const eventTypes = [...new Set(allEvents?.map((e) => e.event_type) || [])];
+    const eventTypes = Array.from(new Set(allEvents?.map((e) => e.event_type) || []));
 
     return NextResponse.json({
       events,

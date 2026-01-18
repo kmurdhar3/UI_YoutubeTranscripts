@@ -23,7 +23,7 @@ export default async function AccountPage() {
   // Fetch transcript history count
   const { count: transcriptCount } = await supabase
     .from('transcript_history')
-    .select('*', { count: 'only', head: true })
+    .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
 
   return (
