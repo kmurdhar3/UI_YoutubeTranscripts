@@ -1,5 +1,4 @@
 import { createClient } from '@/supabase/server'
-import { getTranscriptHistoryStats } from '@/lib/transcript-history'
 import NavbarClient from './navbar-client'
 
 export default async function Navbar() {
@@ -8,8 +7,17 @@ export default async function Navbar() {
   
   let totalDownloads = 0
   if (user) {
-    const stats = await getTranscriptHistoryStats(user.id)
-    totalDownloads = stats.total_downloads
+    // Fetch transcript history stats directly using server supabase client
+    const { data, error } = await supabase
+      .from('transcript_history')
+      .select('total_videos')
+      .eq('user_id', user.id)
+    
+    if (data && !error) {
+      totalDownloads = data.reduce((sum, entry) => {
+        return sum + (entry.total_videos || 1)
+      }, 0)
+    }
   }
   
   const hasReachedLimit = totalDownloads >= 25
