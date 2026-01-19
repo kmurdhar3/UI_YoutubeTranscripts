@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Tempo - Modern SaaS Starter",
-  description: "A modern full-stack starter template powered by Next.js",
+  title: "YouTube Transcript Extractor",
+  description: "Fast, reliable YouTube transcript extraction for content creators, marketers, researchers, and students",
 };
 
 export default function RootLayout({
