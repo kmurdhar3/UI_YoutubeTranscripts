@@ -141,12 +141,21 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
         console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount)
         
         if (user) {
+          // Convert blob to base64 for storage
+          const arrayBuffer = await blob.arrayBuffer()
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ''
+            )
+          )
+          
           await saveTranscriptHistory({
             user_id: user.id,
             video_id: `csv_batch_${Date.now()}`,
             video_title: csvFile.name,
             channel_name: 'CSV Batch Export',
-            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount, data: base64 },
             download_type: 'csv',
             total_videos: videoCount
           })

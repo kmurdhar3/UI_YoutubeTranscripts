@@ -62,7 +62,36 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
     if (entry.transcript_json && entry.id) {
       const result = await getTranscriptJson(entry.id, userId);
       if (result.success && result.data?.transcript_json) {
-        const blob = new Blob([JSON.stringify(result.data.transcript_json, null, 2)], { type: 'application/json' });
+        const jsonData = result.data.transcript_json;
+        
+        // Check if this is a ZIP file with base64 data
+        if (jsonData.type === 'zip' && jsonData.data) {
+          // Decode base64 to binary
+          const binaryString = atob(jsonData.data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          const blob = new Blob([bytes], { type: 'application/zip' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${entry.video_title || entry.video_id || 'transcripts'}-${Date.now()}.zip`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          return;
+        }
+        
+        // Check if this is an old ZIP metadata entry without data
+        if (jsonData.type === 'zip' && jsonData.size && jsonData.count && !jsonData.data) {
+          alert(`This was a ZIP file download containing ${jsonData.count} video(s). This older entry doesn't have the ZIP content stored. Please run the extraction again.`);
+          return;
+        }
+        
+        const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;

@@ -105,13 +105,22 @@ export default function BulkExtractionPage() {
         console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount);
         
         if (userId) {
+          // Convert blob to base64 for storage
+          const arrayBuffer = await blob.arrayBuffer();
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ''
+            )
+          );
+          
           await saveTranscriptHistory({
             user_id: userId,
             video_id: playlistUrl,
             video_title: `Channel/Playlist extraction`,
             download_type: 'channel',
             transcript_text: 'ZIP file download',
-            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount, data: base64 },
             total_videos: videoCount
           });
         }
