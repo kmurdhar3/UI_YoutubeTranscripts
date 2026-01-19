@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/supabase/client";
 import { saveTranscriptHistory, getTranscriptHistoryStats } from "@/lib/transcript-history";
+import { saveTranscriptItems } from "@/lib/transcript-items";
 
 export default function BulkExtractionPage() {
   const [playlistUrl, setPlaylistUrl] = useState("");
@@ -104,25 +106,63 @@ export default function BulkExtractionPage() {
         const blob = await res.blob();
         console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount);
         
+        let historyId: string | null = null;
+        
         if (userId) {
-          // Convert blob to base64 for storage
-          const arrayBuffer = await blob.arrayBuffer();
-          const base64 = btoa(
-            new Uint8Array(arrayBuffer).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
-          );
+          // Extract ZIP contents to store individual transcripts
+          const zip = new JSZip();
+          const zipData = await zip.loadAsync(blob);
+          const transcriptItems = [];
           
-          await saveTranscriptHistory({
+          // Save history entry first
+          const historyResult = await saveTranscriptHistory({
             user_id: userId,
             video_id: playlistUrl,
             video_title: `Channel/Playlist extraction`,
             download_type: 'channel',
             transcript_text: 'ZIP file download',
-            transcript_json: { type: 'zip', size: blob.size, count: videoCount, data: base64 },
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
             total_videos: videoCount
           });
+          
+          if (!historyResult.success) {
+            console.error('Failed to save transcript history:', historyResult.error);
+            alert('Transcript downloaded but failed to save to history. Please check your authentication.');
+          }
+          
+          if (historyResult.success && historyResult.data) {
+            historyId = historyResult.data.id;
+            console.log('Transcript history saved with ID:', historyId);
+            
+            // Extract each file from ZIP
+            for (const [filename, file] of Object.entries(zipData.files)) {
+              if (!file.dir) {
+                const content = await file.async('text');
+                
+                try {
+                  const transcriptData = JSON.parse(content);
+                  // Store the raw content as-is to preserve exact format for re-download
+                  // This ensures history downloads match original file sizes
+                  transcriptItems.push({
+                    history_id: historyId,
+                    video_id: transcriptData.video_id || filename,
+                    video_title: transcriptData.title || transcriptData.video_title || filename,
+                    channel_name: transcriptData.channel_name || null,
+                    transcript_text: transcriptData.transcript_text || transcriptData.transcript || null,
+                    // Store raw JSON to preserve original format exactly
+                    transcript_json: JSON.parse(content)
+                  });
+                } catch (e) {
+                  console.error('Error parsing transcript file:', filename, e);
+                }
+              }
+            }
+            
+            // Save all transcript items
+            if (transcriptItems.length > 0) {
+              await saveTranscriptItems(transcriptItems);
+            }
+          }
         }
         
         const url = window.URL.createObjectURL(blob);
@@ -139,7 +179,7 @@ export default function BulkExtractionPage() {
         console.log('API Response:', data);
         
         if (userId) {
-          await saveTranscriptHistory({
+          const historyResult = await saveTranscriptHistory({
             user_id: userId,
             video_id: playlistUrl,
             video_title: `Channel/Playlist extraction`,
@@ -148,6 +188,14 @@ export default function BulkExtractionPage() {
             transcript_json: data,
             total_videos: data.count || 1
           });
+          
+          if (!historyResult.success) {
+            console.error('Failed to save transcript history:', historyResult.error);
+          } else {
+            console.log('Transcript history saved successfully');
+          }
+        } else {
+          console.warn('User not authenticated, cannot save transcript history');
         }
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

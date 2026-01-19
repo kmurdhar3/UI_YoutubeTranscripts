@@ -22,6 +22,20 @@ export interface TranscriptHistoryStats {
 export async function saveTranscriptHistory(entry: Omit<TranscriptHistoryEntry, 'id' | 'created_at'>) {
   const supabase = createClient();
   
+  // Check if user is authenticated first
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    console.error('User not authenticated, cannot save transcript history:', authError);
+    return { success: false, error: authError || new Error('User not authenticated') };
+  }
+  
+  // Verify the user_id matches the authenticated user
+  if (entry.user_id !== user.id) {
+    console.error('User ID mismatch in transcript history');
+    return { success: false, error: new Error('User ID mismatch') };
+  }
+  
   const { data, error } = await supabase
     .from('transcript_history')
     .insert(entry)

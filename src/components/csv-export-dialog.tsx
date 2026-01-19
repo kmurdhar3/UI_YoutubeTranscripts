@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import JSZip from 'jszip'
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, FileText } from 'lucide-react'
 import { createClient } from '@/supabase/client'
 import { saveTranscriptHistory, getTranscriptHistoryStats } from '@/lib/transcript-history'
+import { saveTranscriptItems } from '@/lib/transcript-items'
 
 interface CSVExportDialogProps {
   children?: React.ReactNode
@@ -141,24 +143,57 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
         console.log('Received ZIP file, size:', blob.size, 'video count:', videoCount)
         
         if (user) {
-          // Convert blob to base64 for storage
-          const arrayBuffer = await blob.arrayBuffer()
-          const base64 = btoa(
-            new Uint8Array(arrayBuffer).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
-          )
+          // Extract ZIP contents to store individual transcripts
+          const zip = new JSZip()
+          const zipData = await zip.loadAsync(blob)
+          const transcriptItems = []
           
-          await saveTranscriptHistory({
+          // Save history entry first
+          const historyResult = await saveTranscriptHistory({
             user_id: user.id,
             video_id: `csv_batch_${Date.now()}`,
             video_title: csvFile.name,
             channel_name: 'CSV Batch Export',
-            transcript_json: { type: 'zip', size: blob.size, count: videoCount, data: base64 },
+            transcript_json: { type: 'zip', size: blob.size, count: videoCount },
             download_type: 'csv',
             total_videos: videoCount
           })
+          
+          if (!historyResult.success) {
+            console.error('Failed to save transcript history:', historyResult.error)
+            alert('Transcript downloaded but failed to save to history. Please check your authentication.')
+          }
+          
+          if (historyResult.success && historyResult.data) {
+            const historyId = historyResult.data.id
+            console.log('Transcript history saved with ID:', historyId)
+            
+            // Extract each file from ZIP
+            for (const [filename, file] of Object.entries(zipData.files)) {
+              if (!file.dir) {
+                const content = await file.async('text')
+                
+                try {
+                  const transcriptData = JSON.parse(content)
+                  transcriptItems.push({
+                    history_id: historyId,
+                    video_id: transcriptData.video_id || filename,
+                    video_title: transcriptData.title || transcriptData.video_title || filename,
+                    channel_name: transcriptData.channel_name || null,
+                    transcript_text: transcriptData.transcript_text || transcriptData.transcript || null,
+                    transcript_json: transcriptData
+                  })
+                } catch (e) {
+                  console.error('Error parsing transcript file:', filename, e)
+                }
+              }
+            }
+            
+            // Save all transcript items
+            if (transcriptItems.length > 0) {
+              await saveTranscriptItems(transcriptItems)
+            }
+          }
         }
         
         const url = window.URL.createObjectURL(blob)
@@ -175,7 +210,7 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
         
         if (user) {
           const videoCount = Array.isArray(data) ? data.length : 1
-          await saveTranscriptHistory({
+          const historyResult = await saveTranscriptHistory({
             user_id: user.id,
             video_id: `csv_batch_${Date.now()}`,
             video_title: csvFile.name,
@@ -184,6 +219,14 @@ export function CSVExportDialog({ children }: CSVExportDialogProps) {
             download_type: 'csv',
             total_videos: videoCount
           })
+          
+          if (!historyResult.success) {
+            console.error('Failed to save transcript history:', historyResult.error)
+          } else {
+            console.log('Transcript history saved successfully')
+          }
+        } else {
+          console.warn('User not authenticated, cannot save transcript history')
         }
         
         // Download the file

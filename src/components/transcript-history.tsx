@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import JSZip from "jszip";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   type TranscriptHistoryEntry,
   type TranscriptHistoryStats
 } from "@/lib/transcript-history";
+import { getTranscriptItems } from "@/lib/transcript-items";
 import { Download, Trash2, Calendar, Video, TrendingUp } from "lucide-react";
 
 interface TranscriptHistoryProps {
@@ -64,31 +66,55 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
       if (result.success && result.data?.transcript_json) {
         const jsonData = result.data.transcript_json;
         
-        // Check if this is a ZIP file with base64 data
-        if (jsonData.type === 'zip' && jsonData.data) {
-          // Decode base64 to binary
-          const binaryString = atob(jsonData.data);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
+        // Check if this is a ZIP-type entry (channel or CSV extraction)
+        if (jsonData.type === 'zip') {
+          // Fetch individual transcript items from the database
+          const itemsResult = await getTranscriptItems(entry.id);
           
-          const blob = new Blob([bytes], { type: 'application/zip' });
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `${entry.video_title || entry.video_id || 'transcripts'}-${Date.now()}.zip`;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-          return;
-        }
-        
-        // Check if this is an old ZIP metadata entry without data
-        if (jsonData.type === 'zip' && jsonData.size && jsonData.count && !jsonData.data) {
-          alert(`This was a ZIP file download containing ${jsonData.count} video(s). This older entry doesn't have the ZIP content stored. Please run the extraction again.`);
-          return;
+          if (itemsResult.success && itemsResult.data && itemsResult.data.length > 0) {
+            // Create a new ZIP file from the stored transcript items
+            // Use the same format as the original download
+            const zip = new JSZip();
+            
+            itemsResult.data.forEach((item, index) => {
+              // Sanitize filename - remove invalid characters
+              const sanitizedTitle = (item.video_title || item.video_id || `transcript_${index + 1}`)
+                .replace(/[<>:"/\\|?*]/g, '_')
+                .substring(0, 100);
+              const fileName = `${sanitizedTitle}.json`;
+              
+              // Use stored transcript_json directly if available, otherwise reconstruct
+              // This ensures we output the same format that was originally saved
+              const content = item.transcript_json 
+                ? JSON.stringify(item.transcript_json, null, 2)
+                : JSON.stringify({
+                    video_id: item.video_id,
+                    video_title: item.video_title,
+                    channel_name: item.channel_name,
+                    transcript_text: item.transcript_text
+                  }, null, 2);
+              zip.file(fileName, content);
+            });
+            
+            // Generate ZIP with compression to match original file size
+            const zipBlob = await zip.generateAsync({ 
+              type: 'blob',
+              compression: 'DEFLATE',
+              compressionOptions: { level: 6 }
+            });
+            const url = window.URL.createObjectURL(zipBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${entry.video_title || entry.video_id || 'transcripts'}-${Date.now()}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            return;
+          } else {
+            alert(`This ZIP file download doesn't have individual transcripts stored. This may be an older entry. Please run the extraction again.`);
+            return;
+          }
         }
         
         const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });

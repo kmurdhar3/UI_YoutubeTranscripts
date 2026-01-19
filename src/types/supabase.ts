@@ -295,6 +295,47 @@ export type Database = {
           },
         ]
       }
+      transcript_items: {
+        Row: {
+          channel_name: string | null
+          created_at: string | null
+          history_id: string
+          id: string
+          transcript_json: Json | null
+          transcript_text: string | null
+          video_id: string
+          video_title: string | null
+        }
+        Insert: {
+          channel_name?: string | null
+          created_at?: string | null
+          history_id: string
+          id?: string
+          transcript_json?: Json | null
+          transcript_text?: string | null
+          video_id: string
+          video_title?: string | null
+        }
+        Update: {
+          channel_name?: string | null
+          created_at?: string | null
+          history_id?: string
+          id?: string
+          transcript_json?: Json | null
+          transcript_text?: string | null
+          video_id?: string
+          video_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_items_history_id_fkey"
+            columns: ["history_id"]
+            isOneToOne: false
+            referencedRelation: "transcript_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_api_tokens: {
         Row: {
           created_at: string

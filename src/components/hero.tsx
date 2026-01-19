@@ -65,7 +65,7 @@ export default function Hero() {
       const videoId = videoIdMatch ? videoIdMatch[1] : "unknown";
 
       if (userId && transcriptText) {
-        await saveTranscriptHistory({
+        const historyResult = await saveTranscriptHistory({
           user_id: userId,
           video_id: videoId,
           video_title: `YouTube Video ${videoId}`,
@@ -74,6 +74,14 @@ export default function Hero() {
           download_type: "single",
           total_videos: 1,
         });
+        
+        if (!historyResult.success) {
+          console.error('Failed to save transcript history:', historyResult.error);
+        } else {
+          console.log('Transcript history saved successfully');
+        }
+      } else {
+        console.warn('Cannot save transcript history - userId:', userId, 'transcriptText length:', transcriptText?.length);
       }
 
       const textBlob = new Blob([transcriptText], { type: "text/plain" });
