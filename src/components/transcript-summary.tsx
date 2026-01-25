@@ -155,7 +155,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
     item.video_id?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleGenerateSummary = async (historyId: string) => {
+  const handleGenerateSummary = async (historyId: string, entry?: TranscriptHistoryEntry) => {
     setSummaryLoading(historyId);
     setSummaryError(null);
     
@@ -173,15 +173,46 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate summary');
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`Failed to generate summary: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Summary API response:', data);
       
       // Set the summary content and switch to summary view
-      if (data.summary) {
-        setSummaryContent(data.summary);
+      if (data.summaries) {
+        // Handle if summaries is an array of objects with summary and video_title
+        let summaryText = '';
+        if (Array.isArray(data.summaries)) {
+          summaryText = data.summaries.map((item: { summary?: string; video_title?: string }) => {
+            if (typeof item === 'string') return item;
+            return item.video_title ? `## ${item.video_title}\n\n${item.summary}` : item.summary;
+          }).join('\n\n---\n\n');
+        } else if (typeof data.summaries === 'object' && data.summaries.summary) {
+          summaryText = data.summaries.summary;
+        } else if (typeof data.summaries === 'string') {
+          summaryText = data.summaries;
+        } else {
+          summaryText = JSON.stringify(data.summaries, null, 2);
+        }
+        setSummaryContent(summaryText);
         setViewMode('summary');
+        
+        // If entry is provided, set it as selected to show the summary view
+        if (entry) {
+          setSelectedEntry(entry);
+          // Create a virtual item to display the summary
+          setSelectedItem({
+            id: entry.id,
+            history_id: entry.id,
+            video_id: entry.video_id || '',
+            video_title: entry.video_title,
+            channel_name: entry.channel_name,
+            created_at: entry.created_at || new Date().toISOString(),
+          } as TranscriptItem);
+        }
       }
     } catch (error) {
       console.error('Error generating summary:', error);
@@ -316,7 +347,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                     className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleGenerateSummary(selectedEntry.id);
+                      handleGenerateSummary(selectedEntry.id, selectedEntry);
                     }}
                     disabled={summaryLoading === selectedEntry.id}
                   >
@@ -455,7 +486,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                     className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleGenerateSummary(entry.id);
+                      handleGenerateSummary(entry.id, entry);
                     }}
                     disabled={summaryLoading === entry.id}
                   >
