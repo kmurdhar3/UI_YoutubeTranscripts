@@ -138,8 +138,12 @@ export type Database = {
           id: string
           interval: string | null
           metadata: Json | null
+          payment_method: string | null
           polar_id: string | null
           polar_price_id: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_subscription_id: string | null
           started_at: number | null
           status: string | null
           updated_at: string
@@ -161,8 +165,12 @@ export type Database = {
           id?: string
           interval?: string | null
           metadata?: Json | null
+          payment_method?: string | null
           polar_id?: string | null
           polar_price_id?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
           started_at?: number | null
           status?: string | null
           updated_at?: string
@@ -184,8 +192,12 @@ export type Database = {
           id?: string
           interval?: string | null
           metadata?: Json | null
+          payment_method?: string | null
           polar_id?: string | null
           polar_price_id?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_subscription_id?: string | null
           started_at?: number | null
           status?: string | null
           updated_at?: string
@@ -200,6 +212,42 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      summaries: {
+        Row: {
+          created_at: string | null
+          history_id: string
+          id: string
+          summary_text: string
+          summary_type: string
+          tokens_used: number | null
+          transcript_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          history_id: string
+          id?: string
+          summary_text: string
+          summary_type?: string
+          tokens_used?: number | null
+          transcript_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          history_id?: string
+          id?: string
+          summary_text?: string
+          summary_type?: string
+          tokens_used?: number | null
+          transcript_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       transcript_downloads: {
         Row: {
@@ -518,7 +566,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      summary_stats: {
+        Row: {
+          avg_tokens_per_summary: number | null
+          first_summary_date: string | null
+          last_summary_date: string | null
+          total_summaries: number | null
+          total_tokens_used: number | null
+          total_transcripts_summarized: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       delete_old_transcript_downloads: { Args: never; Returns: undefined }

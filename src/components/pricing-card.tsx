@@ -12,49 +12,112 @@ import {
 } from "./ui/card";
 import { User } from "@supabase/supabase-js";
 import { Check } from "lucide-react";
+import { useState } from "react";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function PricingCard({ item, user }: {
     item: any,
     user: User | null
 }) {
+  const [loading, setLoading] = useState(false);
 
-  // Handle checkout process
-  const handleCheckout = async (priceId: string) => {
+  // Load Razorpay script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
+  // Handle checkout process with Razorpay
+  const handleCheckout = async (priceId: string, amount: number) => {
     if (!user) {
-      // Redirect to login if user is not authenticated
       window.location.href = "/sign-in";
       return;
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('supabase-functions-create-checkout', {
+      setLoading(true);
+
+      // Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Failed to load Razorpay SDK');
+      }
+
+      // Create Razorpay order
+      const { data: orderData, error: orderError } = await supabase.functions.invoke('supabase-functions-razorpay-create-order', {
         body: {
-          productPriceId: priceId,
-          successUrl: `${window.location.origin}/dashboard`,
-          customerEmail: user.email || '',
-          metadata: {
-            user_id: user.id,
-          } 
-        },
-        headers: {
-          'X-Customer-Email': user.email || '',
+          amount: amount,
+          currency: 'INR',
+          priceId: priceId,
+          userId: user.id,
         }
       });
 
-      if (error) {
-        throw error;
+      if (orderError) {
+        throw orderError;
       }
 
-      // Redirect to Stripe checkout
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
+      // Configure Razorpay checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'YouTube Transcript Extractor',
+        description: item.name,
+        order_id: orderData.orderId,
+        prefill: {
+          email: user.email,
+        },
+        theme: {
+          color: '#EC4899', // Pink-500
+        },
+        handler: async function (response: any) {
+          try {
+            // Verify payment on backend
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('supabase-functions-razorpay-verify-payment', {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                userId: user.id,
+              }
+            });
+
+            if (verifyError) {
+              throw verifyError;
+            }
+
+            // Redirect to success page
+            window.location.href = '/success';
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
       console.error('Error creating checkout session:', error);
-    } 
+      alert('Failed to initiate payment. Please try again.');
+      setLoading(false);
+    }
   };
 
 
@@ -88,15 +151,16 @@ export default function PricingCard({ item, user }: {
             <CardFooter className="relative">
                 <Button 
                     onClick={async () => {
-                        await handleCheckout(item?.prices?.[0]?.id)
+                        await handleCheckout(item?.prices?.[0]?.id, item?.prices?.[0]?.priceAmount / 100)
                     }} 
+                    disabled={loading}
                     className={`w-full py-6 text-lg font-medium ${
                         item.popular 
                             ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white' 
                             : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
                     }`}
                 >
-                    Get Started
+                    {loading ? 'Processing...' : (user ? 'Subscribe Now' : 'Login to continue')}
                 </Button>
             </CardFooter>
         </Card>
