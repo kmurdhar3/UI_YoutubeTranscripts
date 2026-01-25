@@ -61,62 +61,74 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
   };
 
   const handleRowClick = async (entry: TranscriptHistoryEntry) => {
-    if (entry.transcript_json && entry.id) {
+    if (!entry.id) return;
+    
+    // First, try to fetch transcript items (works for both single and batch downloads)
+    const itemsResult = await getTranscriptItems(entry.id);
+    
+    if (itemsResult.success && itemsResult.data && itemsResult.data.length > 0) {
+      const items = itemsResult.data;
+      
+      // Check if this is a ZIP-type entry (channel, batch, or CSV extraction with multiple items)
+      if (items.length > 1 || entry.download_type === 'channel' || entry.download_type === 'batch' || entry.download_type === 'csv') {
+        // Create a ZIP file from the stored transcript items
+        const zip = new JSZip();
+        
+        items.forEach((item, index) => {
+          // Sanitize filename - remove invalid characters
+          const sanitizedTitle = (item.video_title || item.video_id || `transcript_${index + 1}`)
+            .replace(/[<>:"/\\|?*]/g, '_')
+            .substring(0, 100);
+          const fileName = `${sanitizedTitle}.json`;
+          
+          // Use stored transcript_json directly if available, otherwise reconstruct
+          const content = item.transcript_json 
+            ? JSON.stringify(item.transcript_json, null, 2)
+            : JSON.stringify({
+                video_id: item.video_id,
+                video_title: item.video_title,
+                channel_name: item.channel_name,
+                transcript_text: item.transcript_text
+              }, null, 2);
+          zip.file(fileName, content);
+        });
+        
+        // Generate ZIP with compression
+        const zipBlob = await zip.generateAsync({ 
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+        const url = window.URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${entry.video_title || entry.video_id || 'transcripts'}-${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      } else {
+        // Single item - download as text file
+        const item = items[0];
+        const blob = new Blob([item.transcript_text], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${item.video_title || item.video_id || 'transcript'}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+    }
+    
+    // Fallback to old method for legacy entries without transcript_items
+    if (entry.transcript_json) {
       const result = await getTranscriptJson(entry.id, userId);
       if (result.success && result.data?.transcript_json) {
         const jsonData = result.data.transcript_json;
-        
-        // Check if this is a ZIP-type entry (channel or CSV extraction)
-        if (jsonData.type === 'zip') {
-          // Fetch individual transcript items from the database
-          const itemsResult = await getTranscriptItems(entry.id);
-          
-          if (itemsResult.success && itemsResult.data && itemsResult.data.length > 0) {
-            // Create a new ZIP file from the stored transcript items
-            // Use the same format as the original download
-            const zip = new JSZip();
-            
-            itemsResult.data.forEach((item, index) => {
-              // Sanitize filename - remove invalid characters
-              const sanitizedTitle = (item.video_title || item.video_id || `transcript_${index + 1}`)
-                .replace(/[<>:"/\\|?*]/g, '_')
-                .substring(0, 100);
-              const fileName = `${sanitizedTitle}.json`;
-              
-              // Use stored transcript_json directly if available, otherwise reconstruct
-              // This ensures we output the same format that was originally saved
-              const content = item.transcript_json 
-                ? JSON.stringify(item.transcript_json, null, 2)
-                : JSON.stringify({
-                    video_id: item.video_id,
-                    video_title: item.video_title,
-                    channel_name: item.channel_name,
-                    transcript_text: item.transcript_text
-                  }, null, 2);
-              zip.file(fileName, content);
-            });
-            
-            // Generate ZIP with compression to match original file size
-            const zipBlob = await zip.generateAsync({ 
-              type: 'blob',
-              compression: 'DEFLATE',
-              compressionOptions: { level: 6 }
-            });
-            const url = window.URL.createObjectURL(zipBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${entry.video_title || entry.video_id || 'transcripts'}-${Date.now()}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            return;
-          } else {
-            alert(`This ZIP file download doesn't have individual transcripts stored. This may be an older entry. Please run the extraction again.`);
-            return;
-          }
-        }
-        
         const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -218,7 +230,7 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
       {/* History List */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Download History</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Generate Transcripts</h2>
           {history.length > 0 && (
             <Button
               variant="outline"
@@ -278,15 +290,15 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
                 </div>
 
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    entry.id && handleDelete(entry.id);
+                    handleRowClick(entry);
                   }}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  Download
                 </Button>
               </div>
             ))}

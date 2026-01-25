@@ -8,6 +8,7 @@ import { Badge } from "./ui/badge";
 import { useState, useEffect } from "react";
 import { createClient } from "@/supabase/client";
 import { saveTranscriptHistory, getTranscriptHistoryStats } from "@/lib/transcript-history";
+import { saveTranscriptItems } from "@/lib/transcript-items";
 
 export default function Hero() {
   const [url, setUrl] = useState("");
@@ -58,8 +59,8 @@ export default function Hero() {
         throw new Error("Failed to extract transcript");
       }
 
-      const responseBlob = await response.blob();
-      const transcriptText = await responseBlob.text();
+      const responseData = await response.json();
+      const transcriptText = responseData.transcript || responseData.formatted_transcript || "";
 
       const videoIdMatch = url.match(/(?:v=|\/)([\w-]{11})/);
       const videoId = videoIdMatch ? videoIdMatch[1] : "unknown";
@@ -68,9 +69,8 @@ export default function Hero() {
         const historyResult = await saveTranscriptHistory({
           user_id: userId,
           video_id: videoId,
-          video_title: `YouTube Video ${videoId}`,
+          video_title: responseData.title || `YouTube Video ${videoId}`,
           channel_name: "",
-          transcript_text: transcriptText,
           download_type: "single",
           total_videos: 1,
         });
@@ -79,6 +79,24 @@ export default function Hero() {
           console.error('Failed to save transcript history:', historyResult.error);
         } else {
           console.log('Transcript history saved successfully');
+          
+          // Save transcript to transcript_items table
+          if (historyResult.data?.id) {
+            const itemsResult = await saveTranscriptItems([{
+              history_id: historyResult.data.id,
+              video_id: videoId,
+              video_title: responseData.title || `YouTube Video ${videoId}`,
+              channel_name: "",
+              transcript_text: transcriptText.replace(/\n/g, ' '),
+              transcript_json: responseData
+            }]);
+            
+            if (!itemsResult.success) {
+              console.error('Failed to save transcript items:', itemsResult.error);
+            } else {
+              console.log('Transcript items saved successfully');
+            }
+          }
         }
       } else {
         console.warn('Cannot save transcript history - userId:', userId, 'transcriptText length:', transcriptText?.length);

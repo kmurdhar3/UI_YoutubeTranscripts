@@ -112,7 +112,7 @@ export default function BulkExtractionPage() {
           // Extract ZIP contents to store individual transcripts
           const zip = new JSZip();
           const zipData = await zip.loadAsync(blob);
-          const transcriptItems = [];
+          const transcriptItems: Omit<import('@/lib/transcript-items').TranscriptItem, 'id' | 'created_at'>[] = [];
           
           // Save history entry first
           const historyResult = await saveTranscriptHistory({
@@ -141,16 +141,29 @@ export default function BulkExtractionPage() {
                 
                 try {
                   const transcriptData = JSON.parse(content);
-                  // Store the raw content as-is to preserve exact format for re-download
-                  // This ensures history downloads match original file sizes
+                  
+                  // Extract transcript text from various possible formats
+                  let transcriptText = transcriptData.transcript_text || transcriptData.transcript || null;
+                  
+                  // If transcript is an array of segments, join them
+                  if (!transcriptText && Array.isArray(transcriptData.transcript)) {
+                    transcriptText = transcriptData.transcript.map((seg: any) => seg.text || '').join(' ');
+                  }
+                  
+                  // If segments array exists, try that
+                  if (!transcriptText && Array.isArray(transcriptData.segments)) {
+                    transcriptText = transcriptData.segments.map((seg: any) => seg.text || '').join(' ');
+                  }
+                  
+                  console.log('Parsing transcript file:', filename, 'transcript_text length:', transcriptText?.length || 0);
+                  
                   transcriptItems.push({
-                    history_id: historyId,
+                    history_id: historyId!,
                     video_id: transcriptData.video_id || filename,
                     video_title: transcriptData.title || transcriptData.video_title || filename,
                     channel_name: transcriptData.channel_name || null,
-                    transcript_text: transcriptData.transcript_text || transcriptData.transcript || null,
-                    // Store raw JSON to preserve original format exactly
-                    transcript_json: JSON.parse(content)
+                    transcript_text: transcriptText,
+                    transcript_json: transcriptData
                   });
                 } catch (e) {
                   console.error('Error parsing transcript file:', filename, e);
