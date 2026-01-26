@@ -147,7 +147,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
       csv: 'bg-orange-100 text-orange-800',
       playlist: 'bg-pink-100 text-pink-800'
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
+    return colors[type] || 'bg-muted text-muted-foreground';
   };
 
   const filteredItems = transcriptItems.filter(item => 
@@ -225,7 +225,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Loading transcripts...</div>
+        <div className="text-muted-foreground500">Loading transcripts...</div>
       </div>
     );
   }
@@ -242,7 +242,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
         <Button
           variant="ghost"
           onClick={handleBack}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-muted-foreground600 hover:text-muted-foreground900"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to transcripts
@@ -251,9 +251,9 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              <h2 className="text-xl font-bold">{title}</h2>
               {selectedItem.channel_name && (
-                <p className="text-sm text-gray-500">Channel: {selectedItem.channel_name}</p>
+                <p className="text-sm text-muted-foreground500">Channel: {selectedItem.channel_name}</p>
               )}
             </div>
             <div className="flex gap-2">
@@ -278,8 +278,8 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
-            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">
+          <div className="bg-muted/50 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
               {displayContent}
             </pre>
           </div>
@@ -295,7 +295,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
         <Button
           variant="ghost"
           onClick={handleBack}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-muted-foreground600 hover:text-muted-foreground900"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to history
@@ -303,13 +303,13 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-muted-foreground900">
               {selectedEntry.video_title || 'Transcripts'} ({transcriptItems.length} videos)
             </h2>
           </div>
 
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground400" />
             <Input
               type="text"
               placeholder="Search transcripts..."
@@ -323,18 +323,18 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                className="flex items-center gap-4 p-4 border border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => handleItemClick(item)}
               >
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <FileText className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">
+                  <h3 className="font-semibold truncate">
                     {item.video_title || item.video_id}
                   </h3>
                   {item.channel_name && (
-                    <p className="text-sm text-gray-500">{item.channel_name}</p>
+                    <p className="text-sm text-muted-foreground500">{item.channel_name}</p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -374,7 +374,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
         <Button
           variant="ghost"
           onClick={handleBack}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-muted-foreground600 hover:text-muted-foreground900"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to history
@@ -383,9 +383,9 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              <h2 className="text-xl font-bold">{title}</h2>
               {selectedEntry.channel_name && (
-                <p className="text-sm text-gray-500">Channel: {selectedEntry.channel_name}</p>
+                <p className="text-sm text-muted-foreground500">Channel: {selectedEntry.channel_name}</p>
               )}
             </div>
             <div className="flex gap-2">
@@ -410,8 +410,8 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
-            <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">
+          <div className="bg-muted/50 rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
               {displayContent}
             </pre>
           </div>
@@ -425,14 +425,14 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
     <div className="space-y-6">
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Read Transcripts</h2>
+          <h2 className="text-2xl font-bold">Read Transcripts</h2>
         </div>
 
         {history.length === 0 ? (
           <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No transcripts yet</p>
-            <p className="text-sm text-gray-400 mt-2">
+            <FileText className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+            <p className="text-muted-foreground500">No transcripts yet</p>
+            <p className="text-sm text-muted-foreground400 mt-2">
               Extract transcripts to read them here
             </p>
           </div>
@@ -441,7 +441,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
             {history.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                className="flex items-start gap-4 p-4 border border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => handleEntryClick(entry)}
               >
                 <div className="p-2 bg-purple-100 rounded-lg">
@@ -453,7 +453,7 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                       {entry.download_type}
                     </Badge>
                     {entry.created_at && (
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground500 flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatDate(entry.created_at)}
                       </span>
@@ -461,12 +461,12 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                   </div>
                   
                   {entry.video_title && (
-                    <h3 className="font-semibold text-gray-900 mb-1 truncate">
+                    <h3 className="font-semibold mb-1 truncate">
                       {entry.video_title}
                     </h3>
                   )}
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground600">
                     {entry.channel_name && (
                       <span>Channel: {entry.channel_name}</span>
                     )}

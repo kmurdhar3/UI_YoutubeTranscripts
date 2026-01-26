@@ -15,11 +15,15 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
+
   const { data: plans, error } = await supabase.functions.invoke(
     "supabase-functions-get-plans",
   );
 
-  const result = plans?.items;
+  // Filter to show only monthly plans
+  const result = plans?.items?.filter((item: any) => 
+    item.name?.toLowerCase().includes('monthly')
+  );
 
   return (
     <div className="min-h-screen">

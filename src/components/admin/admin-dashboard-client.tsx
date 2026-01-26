@@ -123,30 +123,30 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1
-            className="text-2xl sm:text-3xl font-bold text-white"
+            className="text-2xl sm:text-3xl font-bold"
             style={{ fontFamily: "Fraunces, serif" }}
           >
             Dashboard
           </h1>
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Welcome back, {admin.name || "Admin"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex bg-slate-800 rounded-lg p-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="flex bg-muted rounded-lg p-1 overflow-x-auto">
             {["7d", "30d", "90d", "1y"].map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-3 py-1.5 text-xs font-medium rounded ${
+                className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap ${
                   period === p
-                    ? "bg-blue-500 text-white"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {p}
@@ -158,7 +158,6 @@ export function AdminDashboardClient({ admin }: AdminDashboardClientProps) {
             size="sm"
             onClick={fetchStats}
             disabled={loading}
-            className="border-slate-700 text-slate-300 hover:bg-slate-800"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>

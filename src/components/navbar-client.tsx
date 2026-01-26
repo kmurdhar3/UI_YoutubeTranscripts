@@ -1,8 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from './ui/button'
-import { Menu, Chrome, MessageCircle } from 'lucide-react'
+import { Menu, Chrome, MessageCircle, X } from 'lucide-react'
 import UserProfile from './user-profile'
 import { ThemeSwitcher } from './theme-switcher'
 import { CSVExportClient } from './csv-export-client'
@@ -14,6 +15,8 @@ interface NavbarClientProps {
 }
 
 export default function NavbarClient({ user, hasReachedLimit }: NavbarClientProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-14 sm:h-16 flex justify-between items-center">
@@ -22,11 +25,11 @@ export default function NavbarClient({ user, hasReachedLimit }: NavbarClientProp
             TranscriptX
           </Link>
           <div className="hidden lg:flex items-center gap-4 xl:gap-6">
-            <Link href="/history" className="text-sm font-medium transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <Link href="/history" className="text-sm font-medium transition-colors hover:text-primary" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               History
             </Link>
             {user && !hasReachedLimit ? (
-              <Link href="/bulk-extraction" className="text-sm font-medium transition-colors" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <Link href="/bulk-extraction" className="text-sm font-medium transition-colors hover:text-primary" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 Bulk Extraction
               </Link>
             ) : user && hasReachedLimit ? (
@@ -84,11 +87,66 @@ export default function NavbarClient({ user, hasReachedLimit }: NavbarClientProp
               </Link>
             </>
           )}
-          <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
-            <Menu className="w-5 h-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="lg:hidden h-8 w-8"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t bg-background">
+          <div className="container mx-auto px-4 py-4 space-y-3">
+            <Link 
+              href="/history" 
+              className="block py-2 text-sm font-medium hover:text-primary" 
+              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              History
+            </Link>
+            {user && !hasReachedLimit ? (
+              <Link 
+                href="/bulk-extraction" 
+                className="block py-2 text-sm font-medium hover:text-primary" 
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Bulk Extraction
+              </Link>
+            ) : (
+              <span className="block py-2 text-sm font-medium text-muted-foreground opacity-50" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                Bulk Extraction
+              </span>
+            )}
+            {user && (
+              <Link 
+                href="/dashboard" 
+                className="block py-2 text-sm font-medium hover:text-primary sm:hidden" 
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+            {!user && (
+              <Link 
+                href="/sign-in" 
+                className="block py-2 text-sm font-medium hover:text-primary sm:hidden" 
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

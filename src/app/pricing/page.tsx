@@ -7,9 +7,22 @@ export default async function Pricing() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { data: plans, error } = await supabase.functions.invoke('supabase-functions-get-plans');
-
-    const result = plans?.items;
+    // Hardcoded INR 999 plan for one month
+    const result = [
+        {
+            id: "monthly-plan",
+            name: "Monthly Plan",
+            description: "1000 transcripts per month\n90 day history retention\nBulk transcripts\nChannels transcripts\nTranscripts summary\nEmail support",
+            popular: true,
+            prices: [
+                {
+                    id: "price-999-inr",
+                    priceAmount: 99900, // 999 in paise
+                    currency: "INR"
+                }
+            ]
+        }
+    ];
 
     return (
         <>

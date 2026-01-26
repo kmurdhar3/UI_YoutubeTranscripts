@@ -14,9 +14,9 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6]">
+    <div className="min-h-screen bg-background">
       <DashboardNavbar />
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
         <div className="max-w-6xl mx-auto">
           <TranscriptHistoryClient userId={user.id} />
         </div>

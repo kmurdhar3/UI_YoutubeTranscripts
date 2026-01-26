@@ -15,35 +15,35 @@ export function TranscriptHistoryClient({
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <h1
-          className="text-4xl font-bold text-gray-900 mb-2"
+          className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2"
           style={{ fontFamily: "Fraunces, serif" }}
         >
           Transcript History/Summary
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-base sm:text-lg text-muted-foreground">
           View and manage your transcript download history
         </p>
       </div>
       {/* Tab Navigation */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-4 mb-6 border-b border-border overflow-x-auto">
         <button
           onClick={() => setActiveTab("history")}
-          className={`pb-3 px-1 text-lg font-semibold transition-colors ${
+          className={`pb-3 px-1 text-base sm:text-lg font-semibold transition-colors whitespace-nowrap ${
             activeTab === "history"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-primary border-b-2 border-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           History
         </button>
         <button
           onClick={() => setActiveTab("summary")}
-          className={`pb-3 px-1 text-lg font-semibold transition-colors ${
+          className={`pb-3 px-1 text-base sm:text-lg font-semibold transition-colors whitespace-nowrap ${
             activeTab === "summary"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-primary border-b-2 border-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Transcript Summary

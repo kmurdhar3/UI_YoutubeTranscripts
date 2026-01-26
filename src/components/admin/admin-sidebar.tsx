@@ -1,7 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+
+function useSafePathname() {
+  try {
+    // Use require to avoid eagerly importing App Router hooks in environments
+    // where the router context isn't available (e.g., certain storyboards).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const nav = require("next/navigation") as typeof import("next/navigation");
+    return nav.usePathname();
+  } catch {
+    return "";
+  }
+}
 import {
   LayoutDashboard,
   Users,
@@ -31,7 +43,8 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ adminName, adminEmail }: AdminSidebarProps) {
-  const pathname = usePathname();
+  const pathname = useSafePathname();
+
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

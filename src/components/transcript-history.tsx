@@ -165,62 +165,62 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      single: 'bg-blue-100 text-blue-800',
-      batch: 'bg-purple-100 text-purple-800',
-      channel: 'bg-green-100 text-green-800',
-      csv: 'bg-orange-100 text-orange-800',
-      playlist: 'bg-pink-100 text-pink-800'
+      single: 'bg-blue-500/20 text-blue-400 dark:bg-blue-500/20 dark:text-blue-400',
+      batch: 'bg-purple-500/20 text-purple-400 dark:bg-purple-500/20 dark:text-purple-400',
+      channel: 'bg-green-500/20 text-green-400 dark:bg-green-500/20 dark:text-green-400',
+      csv: 'bg-orange-500/20 text-orange-400 dark:bg-orange-500/20 dark:text-orange-400',
+      playlist: 'bg-pink-500/20 text-pink-400 dark:bg-pink-500/20 dark:text-pink-400'
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
+    return colors[type] || 'bg-muted text-muted-foreground';
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Loading history...</div>
+        <div className="text-muted-foreground">Loading history...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="p-4 sm:p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Download className="w-6 h-6 text-blue-600" />
+              <div className="p-2 sm:p-3 bg-blue-500/20 rounded-lg">
+                <Download className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Downloads</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total_downloads}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Total Downloads</p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.total_downloads}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+              <div className="p-2 sm:p-3 bg-green-500/20 rounded-lg">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Most Used Type</p>
-                <p className="text-xl font-semibold text-gray-900 capitalize">
+                <p className="text-xs sm:text-sm text-muted-foreground">Most Used Type</p>
+                <p className="text-lg sm:text-xl font-semibold capitalize">
                   {Object.entries(stats.downloads_by_type).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None'}
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Video className="w-6 h-6 text-purple-600" />
+              <div className="p-2 sm:p-3 bg-purple-500/20 rounded-lg">
+                <Video className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Recent Activity</p>
-                <p className="text-xl font-semibold text-gray-900">{stats.recent_downloads.length}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Recent Activity</p>
+                <p className="text-lg sm:text-xl font-semibold">{stats.recent_downloads.length}</p>
               </div>
             </div>
           </Card>
@@ -228,15 +228,15 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
       )}
 
       {/* History List */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Generate Transcripts</h2>
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold">Generate Transcripts</h2>
           {history.length > 0 && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleClearAll}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="text-red-500 hover:text-red-600 hover:bg-red-500/10 w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Clear All
@@ -246,27 +246,27 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
 
         {history.length === 0 ? (
           <div className="text-center py-12">
-            <Download className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No download history yet</p>
-            <p className="text-sm text-gray-400 mt-2">
+            <Download className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+            <p className="text-muted-foreground">No download history yet</p>
+            <p className="text-sm text-muted-foreground/70 mt-2">
               Your transcript downloads will appear here
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {history.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => handleRowClick(entry)}
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     <Badge className={getTypeColor(entry.download_type)}>
                       {entry.download_type}
                     </Badge>
                     {entry.created_at && (
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatDate(entry.created_at)}
                       </span>
@@ -274,17 +274,17 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
                   </div>
                   
                   {entry.video_title && (
-                    <h3 className="font-semibold text-gray-900 mb-1 truncate">
+                    <h3 className="font-semibold mb-1 line-clamp-2 sm:truncate">
                       {entry.video_title}
                     </h3>
                   )}
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     {entry.channel_name && (
-                      <span>Channel: {entry.channel_name}</span>
+                      <span className="truncate">Channel: {entry.channel_name}</span>
                     )}
                     {entry.video_id && (
-                      <span className="font-mono text-xs">ID: {entry.video_id}</span>
+                      <span className="font-mono text-xs truncate">ID: {entry.video_id}</span>
                     )}
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export function TranscriptHistory({ userId }: TranscriptHistoryProps) {
                     e.stopPropagation();
                     handleRowClick(entry);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full sm:w-auto whitespace-nowrap"
                 >
                   Download
                 </Button>

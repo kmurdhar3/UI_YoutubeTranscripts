@@ -66,8 +66,8 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
   }, [user.id])
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#0F172A] py-12 px-4">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background py-6 sm:py-8 lg:py-12 px-4">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Back Button */}
         <Button 
           variant="ghost" 
@@ -79,11 +79,11 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
         </Button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <UserIcon className="w-6 h-6" />
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <UserIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <h1 className="text-4xl font-bold" style={{ fontFamily: 'Fraunces, serif' }}>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold" style={{ fontFamily: 'Fraunces, serif' }}>
             My Account
           </h1>
         </div>
@@ -93,8 +93,8 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
           <CardHeader>
             <CardTitle style={{ fontFamily: 'Fraunces, serif' }}>Subscription</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Current subscription:</p>
                 <Badge variant="secondary" className="text-sm font-semibold">
@@ -105,7 +105,7 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
                 <p className="text-sm text-muted-foreground mb-1">Subscription usage:</p>
                 <p className="text-lg font-semibold">{transcriptCount}/{subscriptionQuota}</p>
               </div>
-              <div>
+              <div className="sm:col-span-2 lg:col-span-1">
                 <p className="text-sm text-muted-foreground mb-1">Quota resets:</p>
                 <p className="text-lg font-semibold">{quotaResetDate}</p>
               </div>
@@ -117,14 +117,15 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
                 <p className="text-sm text-muted-foreground">API token:</p>
               </div>
               {showToken && apiToken ? (
-                <div className="bg-muted p-3 rounded-md mb-4">
-                  <code className="text-sm break-all">{apiToken}</code>
+                <div className="bg-muted p-3 rounded-md mb-4 overflow-x-auto">
+                  <code className="text-xs sm:text-sm break-all">{apiToken}</code>
                 </div>
               ) : (
                 <Button 
                   variant="outline" 
                   onClick={generateApiToken}
                   style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                  className="w-full sm:w-auto"
                 >
                   <Key className="w-4 h-4 mr-2" />
                   Generate API Token
@@ -132,9 +133,9 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button 
-                className="bg-[#F59E0B] hover:bg-[#F59E0B]/90"
+                className="bg-accent hover:bg-accent/90 w-full sm:w-auto"
                 style={{ fontFamily: 'Space Grotesk, sans-serif' }}
                 onClick={() => router.push('/pricing')}
               >
@@ -143,12 +144,14 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
               <Button 
                 variant="outline"
                 style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                className="w-full sm:w-auto"
               >
                 Manage Subscription
               </Button>
               <Button 
                 variant="outline"
                 style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+                className="w-full sm:w-auto"
               >
                 Invoices
               </Button>
@@ -182,8 +185,8 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
               <div>
                 <p className="text-sm text-muted-foreground">Email:</p>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <p className="text-lg font-medium">{user.email}</p>
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <p className="text-base sm:text-lg font-medium break-all">{user.email}</p>
                 </div>
               </div>
             </div>
@@ -191,7 +194,7 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
               <Calendar className="w-5 h-5 text-muted-foreground mt-1" />
               <div>
                 <p className="text-sm text-muted-foreground">Created:</p>
-                <p className="text-lg font-medium">
+                <p className="text-base sm:text-lg font-medium">
                   {new Date(user.created_at).toLocaleDateString('en-US', {
                     weekday: 'short',
                     year: 'numeric',
@@ -211,12 +214,12 @@ export default function AccountClient({ user, subscription, transcriptCount }: A
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4 p-4 border rounded-lg">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xl font-bold">G</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-lg sm:text-xl font-bold">G</span>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="font-semibold">Google</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                 <p className="text-xs text-muted-foreground">
                   {user.user_metadata?.full_name || 'User'}
                 </p>

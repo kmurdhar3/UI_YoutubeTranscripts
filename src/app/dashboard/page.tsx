@@ -28,7 +28,7 @@ export default async function Dashboard() {
     <SubscriptionCheck>
       <DashboardNavbar />
       <main className="w-full">
-        <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8">
           <div className="flex justify-end">
             <Suspense fallback={<div>Loading...</div>}>
               {result?.url && <ManageSubscription redirectUrl={result?.url!} />}
@@ -36,19 +36,19 @@ export default async function Dashboard() {
           </div>
           {/* Header Section */}
           <header className="flex flex-col gap-4">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <div className="bg-secondary/50 text-sm p-3 px-4 rounded-lg text-muted-foreground flex gap-2 items-center">
+            <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+            <div className="bg-muted/50 text-sm p-3 px-4 rounded-lg text-muted-foreground flex gap-2 items-center">
               <InfoIcon size="14" />
               <span>This is a protected page only visible to authenticated users</span>
             </div>
           </header>
 
           {/* User Profile Section */}
-          <section className="bg-card rounded-xl p-6 border shadow-sm">
-            <div className="flex items-center gap-4 mb-6">
+          <section className="bg-card rounded-xl p-4 sm:p-6 border shadow-sm">
+            <div className="flex items-center gap-4 mb-4 sm:mb-6">
               <UserCircle size={48} className="text-primary" />
               <div>
-                <h2 className="font-semibold text-xl">User Profile</h2>
+                <h2 className="font-semibold text-lg sm:text-xl">User Profile</h2>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
