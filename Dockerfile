@@ -8,9 +8,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RAZORPAY_KEY_ID=rzp_live_S7iRzAnpi1Y6Kq
-RAZORPAY_KEY_SECRET=4OSsJy75yTyamZI6uWqBIu2Q
-RAZORPAY_WEBHOOK_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+ENV RAZORPAY_KEY_ID=
+ENV RAZORPAY_KEY_SECRET=
+ENV RAZORPAY_WEBHOOK_SECRET=
 
  
 # Add your Supabase credentials here

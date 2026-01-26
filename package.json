@@ -51,7 +51,6 @@
     "next-themes": "^0.2.1",
     "prettier": "^3.3.3",
     "radix-ui": "^1.1.3",
-    "razorpay": "^2.9.6",
     "react": "^18",
     "react-day-picker": "^9.12.0",
     "react-dom": "^18",
@@ -67,6 +66,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

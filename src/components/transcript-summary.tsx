@@ -346,9 +346,11 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                     size="sm" 
                     className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleGenerateSummary(selectedEntry.id, selectedEntry);
-                    }}
+  e.stopPropagation();
+  if (selectedEntry.id) {
+    handleGenerateSummary(selectedEntry.id, selectedEntry);
+  }
+}}
                     disabled={summaryLoading === selectedEntry.id}
                   >
                     {summaryLoading === selectedEntry.id ? 'Generating...' : 'Generate Summary'}
@@ -486,7 +488,10 @@ export function TranscriptSummary({ userId }: TranscriptSummaryProps) {
                     className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleGenerateSummary(entry.id, entry);
+                      if (entry.id) {
+    handleGenerateSummary(entry.id, entry);
+  }
+                      
                     }}
                     disabled={summaryLoading === entry.id}
                   >
